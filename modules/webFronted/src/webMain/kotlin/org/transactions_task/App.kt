@@ -15,8 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.painterResource
 
-import transactionstask.composeapp.generated.resources.Res
-import transactionstask.composeapp.generated.resources.compose_multiplatform
+import transactionstask.modules.webfronted.generated.resources.Res
+import transactionstask.modules.webfronted.generated.resources.compose_multiplatform
 
 @Composable
 fun App() {

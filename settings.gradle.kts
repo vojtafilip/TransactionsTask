@@ -28,6 +28,6 @@ dependencyResolutionManagement {
     }
 }
 
-include("modules:composeApp")
+include("modules:webFronted")
 include("modules:server")
 include("modules:shared")
