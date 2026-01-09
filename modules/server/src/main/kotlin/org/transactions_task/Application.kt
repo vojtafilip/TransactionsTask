@@ -4,6 +4,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import org.transactions_task.api.configureRouting
+import org.transactions_task.api.configureSerialization
 
 
 fun main() {
@@ -12,5 +13,6 @@ fun main() {
 }
 
 fun Application.module() {
+    configureSerialization()
     configureRouting()
 }
