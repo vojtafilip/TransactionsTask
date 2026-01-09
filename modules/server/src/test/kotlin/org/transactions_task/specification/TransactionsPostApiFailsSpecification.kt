@@ -1,5 +1,6 @@
 package org.transactions_task.specification
 
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
@@ -29,6 +30,7 @@ class TransactionsPostApiFailsSpecification {
 
         // then
         assertEquals(HttpStatusCode.PayloadTooLarge, response.status)
+        assertEquals("", response.bodyAsText())
     }
 
     @Test
@@ -50,6 +52,7 @@ class TransactionsPostApiFailsSpecification {
 
         // then
         assertEquals(HttpStatusCode.UnsupportedMediaType, response.status)
+        assertEquals("", response.bodyAsText())
     }
 
     @Test
@@ -63,6 +66,7 @@ class TransactionsPostApiFailsSpecification {
 
         // then
         assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals("Key reference is missing in the map.", response.bodyAsText())
     }
 
     @Test
@@ -76,5 +80,45 @@ class TransactionsPostApiFailsSpecification {
 
         // then
         assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals("Empty CSV file.", response.bodyAsText())
+    }
+
+    @Test
+    fun `should fail on missing column`() = testApplication {
+        // given
+        setupApplicationModule()
+        val requestBody = """
+            reference,timestamp,amount,currency
+            10000002,2023-01-11T09:00:00Z,-100,CZK
+        """
+            .trimIndent()
+
+        // when
+        val response = postTransactions(requestBody)
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals("Key description is missing in the map.", response.bodyAsText())
+    }
+
+    @Test
+    fun `should fail on missing field in a row`() = testApplication {
+        // given
+        setupApplicationModule()
+        val requestBody = """
+            reference,timestamp,amount,currency,description
+            10000002,2023-01-11T09:00:00Z,-100,CZK
+        """
+            .trimIndent()
+
+        // when
+        val response = postTransactions(requestBody)
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals(
+            "Fields num seems to be 5 on each row, but on 1th csv row, fields num is 4.",
+            response.bodyAsText()
+        )
     }
 }

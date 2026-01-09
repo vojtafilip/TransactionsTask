@@ -48,8 +48,14 @@ fun Application.configureRouting() {
                         call.respond(HttpStatusCode.BadRequest, result.message)
                         return@post
                     }
+
+                    is TransactionsCsvReader.CsvReadResult.MissingCsvField -> {
+                        call.respond(HttpStatusCode.BadRequest, result.message)
+                        return@post
+                    }
+
                     is TransactionsCsvReader.CsvReadResult.EmptyCsv -> {
-                        call.respond(HttpStatusCode.BadRequest, "Empty CSV file")
+                        call.respond(HttpStatusCode.BadRequest, "Empty CSV file.")
                         return@post
                     }
 
