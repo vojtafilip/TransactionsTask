@@ -16,15 +16,15 @@ fun main() {
 
 fun Application.module() {
     routing {
-        get("/") {
-            call.respondText("Ktor: ${Greeting().greet()}")
+        get(Routes.ROOT) {
+            call.respondText(Strings.API_DESCRIPTION)
         }
 
-        route("/transactions") {
+        route(Routes.TRANSACTIONS) {
             setupTransactionsBodyLimit()
 
             post {
-                call.respondText("OK")
+                call.respondText(Strings.OK)
             }
         }
     }
