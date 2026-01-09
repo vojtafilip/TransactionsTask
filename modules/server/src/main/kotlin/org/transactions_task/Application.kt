@@ -1,8 +1,11 @@
 package org.transactions_task
 
+import io.ktor.http.HttpMethod
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.bodylimit.RequestBodyLimit
+import io.ktor.server.request.httpMethod
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -15,6 +18,25 @@ fun Application.module() {
     routing {
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
+        }
+
+        route("/transactions") {
+            setupTransactionsBodyLimit()
+
+            post {
+                call.respondText("OK")
+            }
+        }
+    }
+}
+
+private fun Route.setupTransactionsBodyLimit() {
+    install(RequestBodyLimit) {
+        bodyLimit { call ->
+            when (call.request.httpMethod) {
+                HttpMethod.Post -> TRANSACTIONS_FILE_SIZE_LIMIT
+                else -> Long.MAX_VALUE
+            }
         }
     }
 }
