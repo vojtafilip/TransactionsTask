@@ -21,6 +21,7 @@ import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
 import org.transactions_task.TRANSACTIONS_FILE_SIZE_LIMIT
 import org.transactions_task.api.TransactionsCsvReader.CsvReadResult.*
+import org.transactions_task.api.model.TransactionsResponseDTO
 
 
 object Routes {
@@ -35,49 +36,15 @@ fun Application.configureRouting() {
         }
 
         route(Routes.TRANSACTIONS) {
-            setupTransactionsBodyLimit()
-            post {
-                if (!isCsvContentType()) return@post
-
-                // TODO get by DI
-                val transactionsCsvReader = TransactionsCsvReader()
-
-                val ips = call.receiveChannel().toInputStream()
-
-                when (val result = transactionsCsvReader.read(ips)) {
-                    is WrongCsvHeader -> {
-                        call.respond(HttpStatusCode.BadRequest, result.message)
-                        return@post
-                    }
-
-                    is MissingCsvField -> {
-                        call.respond(HttpStatusCode.BadRequest, result.message)
-                        return@post
-                    }
-
-                    is WrongCsvLine -> {
-                        call.respond(HttpStatusCode.BadRequest, result.message)
-                        return@post
-                    }
-
-                    is EmptyCsv -> {
-                        call.respond(HttpStatusCode.BadRequest, "Empty CSV file.")
-                        return@post
-                    }
-
-                    is Success -> {
-                        // nothing now ... TODO process transactions...
-                    }
-                }
-
-                call.respondText(Strings.OK)
-            }
+            setupTransactionsPostBodyLimit()
+            post { processTransactionsPost() }
+            get { processTransactionsGet() }
         }
     }
 
 }
 
-private fun Route.setupTransactionsBodyLimit() {
+private fun Route.setupTransactionsPostBodyLimit() {
     install(RequestBodyLimit) {
         bodyLimit { call ->
             when (call.request.httpMethod) {
@@ -86,6 +53,43 @@ private fun Route.setupTransactionsBodyLimit() {
             }
         }
     }
+}
+
+private suspend fun RoutingContext.processTransactionsPost() {
+    if (!isCsvContentType()) return
+
+    // TODO get by DI
+    val transactionsCsvReader = TransactionsCsvReader()
+
+    val ips = call.receiveChannel().toInputStream()
+
+    when (val result = transactionsCsvReader.read(ips)) {
+        is WrongCsvHeader -> {
+            call.respond(HttpStatusCode.BadRequest, result.message)
+            return
+        }
+
+        is MissingCsvField -> {
+            call.respond(HttpStatusCode.BadRequest, result.message)
+            return
+        }
+
+        is WrongCsvLine -> {
+            call.respond(HttpStatusCode.BadRequest, result.message)
+            return
+        }
+
+        is EmptyCsv -> {
+            call.respond(HttpStatusCode.BadRequest, "Empty CSV file.")
+            return
+        }
+
+        is Success -> {
+            // nothing now ... TODO process transactions...
+        }
+    }
+
+    call.respondText(Strings.OK)
 }
 
 private suspend fun RoutingContext.isCsvContentType(): Boolean {
@@ -97,4 +101,15 @@ private suspend fun RoutingContext.isCsvContentType(): Boolean {
         return false
     }
     return true
+}
+
+private suspend fun RoutingContext.processTransactionsGet() {
+
+    TODO()
+
+    val responseDTO = TransactionsResponseDTO(listOf(
+        TransactionsResponseDTO.TransactionDTO(1, "2023-01-11T03:00:01Z", 1000, "CZK", "description")
+    ))
+
+    call.respond(HttpStatusCode.OK, responseDTO)
 }
