@@ -20,8 +20,8 @@ import io.ktor.utils.io.jvm.javaio.toInputStream
 import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
 import org.transactions_task.TRANSACTIONS_FILE_SIZE_LIMIT
-import org.transactions_task.api.TransactionsCsvReader.CsvReadResult.*
-import org.transactions_task.api.model.TransactionsResponseDTO
+import org.transactions_task.api.service.GetTransactionsService
+import org.transactions_task.api.service.PostTransactionsService
 
 
 object Routes {
@@ -59,37 +59,22 @@ private suspend fun RoutingContext.processTransactionsPost() {
     if (!isCsvContentType()) return
 
     // TODO get by DI
-    val transactionsCsvReader = TransactionsCsvReader()
+    val postTransactionsService = PostTransactionsService()
 
     val ips = call.receiveChannel().toInputStream()
 
-    when (val result = transactionsCsvReader.read(ips)) {
-        is WrongCsvHeader -> {
+    when (val result = postTransactionsService.process(ips)) {
+        is PostTransactionsService.ProcessResult.BadRequest -> {
             call.respond(HttpStatusCode.BadRequest, result.message)
             return
         }
 
-        is MissingCsvField -> {
-            call.respond(HttpStatusCode.BadRequest, result.message)
+        is PostTransactionsService.ProcessResult.Success -> {
+            // TODO send result message
+            call.respondText(Strings.OK)
             return
-        }
-
-        is WrongCsvLine -> {
-            call.respond(HttpStatusCode.BadRequest, result.message)
-            return
-        }
-
-        is EmptyCsv -> {
-            call.respond(HttpStatusCode.BadRequest, "Empty CSV file.")
-            return
-        }
-
-        is Success -> {
-            // nothing now ... TODO process transactions...
         }
     }
-
-    call.respondText(Strings.OK)
 }
 
 private suspend fun RoutingContext.isCsvContentType(): Boolean {
@@ -105,11 +90,12 @@ private suspend fun RoutingContext.isCsvContentType(): Boolean {
 
 private suspend fun RoutingContext.processTransactionsGet() {
 
-    TODO()
+    // TODO get by DI
+    val getTransactionsService = GetTransactionsService()
 
-    val responseDTO = TransactionsResponseDTO(listOf(
-        TransactionsResponseDTO.TransactionDTO(1, "2023-01-11T03:00:01Z", 1000, "CZK", "description")
-    ))
+    // TODO use mapper to DTO
+    val x = getTransactionsService.getTransactions()
+    val responseDTO = x.transactions
 
     call.respond(HttpStatusCode.OK, responseDTO)
 }
