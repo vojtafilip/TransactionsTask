@@ -1,6 +1,6 @@
 package org.transactions_task.api.service
 
-import org.transactions_task.api.model.TransactionsResponseDTO
+import org.transactions_task.api.dto.TransactionsResponseDTO
 
 class GetTransactionsService {
 

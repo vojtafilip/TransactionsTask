@@ -1,4 +1,4 @@
-package org.transactions_task.api.model
+package org.transactions_task.api.dto
 
 import kotlinx.serialization.Serializable
 
