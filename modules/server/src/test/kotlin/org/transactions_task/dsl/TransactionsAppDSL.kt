@@ -14,8 +14,11 @@ fun ApplicationTestBuilder.setupApplicationModule() {
     }
 }
 
-suspend fun ApplicationTestBuilder.postTransactions(requestBody: String): HttpResponse =
+suspend fun ApplicationTestBuilder.postTransactions(
+    requestBody: String,
+    contentType: ContentType = ContentType.Text.CSV
+): HttpResponse =
     client.post("/transactions") {
-        contentType(ContentType.Text.CSV)
+        contentType(contentType)
         setBody(requestBody)
     }

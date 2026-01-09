@@ -1,10 +1,13 @@
 package org.transactions_task
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.bodylimit.RequestBodyLimit
+import io.ktor.server.request.contentType
 import io.ktor.server.request.httpMethod
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -22,8 +25,9 @@ fun Application.module() {
 
         route(Routes.TRANSACTIONS) {
             setupTransactionsBodyLimit()
-
             post {
+                if (!isCsvContentType()) return@post
+
                 call.respondText(Strings.OK)
             }
         }
@@ -39,4 +43,15 @@ private fun Route.setupTransactionsBodyLimit() {
             }
         }
     }
+}
+
+private suspend fun RoutingContext.isCsvContentType(): Boolean {
+    if (!FeatureToggle.useContentTypeCheck) {
+        return true
+    }
+    if (!call.request.contentType().match(ContentType.Text.CSV)) {
+        call.respond(HttpStatusCode.UnsupportedMediaType)
+        return false
+    }
+    return true
 }

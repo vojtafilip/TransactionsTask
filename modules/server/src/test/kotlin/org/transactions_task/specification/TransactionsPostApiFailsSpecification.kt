@@ -1,7 +1,9 @@
 package org.transactions_task.specification
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import org.transactions_task.FeatureToggle
 import org.transactions_task.dsl.postTransactions
 import org.transactions_task.dsl.setupApplicationModule
 import kotlin.test.Test
@@ -27,5 +29,26 @@ class TransactionsPostApiFailsSpecification {
 
         // then
         assertEquals(HttpStatusCode.PayloadTooLarge, response.status)
+    }
+
+    @Test
+    fun `should fail on wrong content type`() = testApplication {
+
+        // Skip if feature switched off ... TODO mark test as skipped
+        if (!FeatureToggle.useContentTypeCheck) return@testApplication
+
+        // given
+        setupApplicationModule()
+        val requestBody = """
+            reference,timestamp,amount,currency,description
+            10000002,2023-01-11T09:00:00Z,-100,CZK,Lekárna Hradčanská
+        """
+            .trimIndent()
+
+        // when
+        val response = postTransactions(requestBody, ContentType.Text.Xml)
+
+        // then
+        assertEquals(HttpStatusCode.UnsupportedMediaType, response.status)
     }
 }
