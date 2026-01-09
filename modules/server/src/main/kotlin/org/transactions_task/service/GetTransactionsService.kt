@@ -1,4 +1,4 @@
-package org.transactions_task.api.service
+package org.transactions_task.service
 
 import org.transactions_task.api.dto.TransactionsResponseDTO
 

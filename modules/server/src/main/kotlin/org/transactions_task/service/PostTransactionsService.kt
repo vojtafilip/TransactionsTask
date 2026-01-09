@@ -1,11 +1,11 @@
-package org.transactions_task.api.service
+package org.transactions_task.service
 
-import org.transactions_task.api.service.TransactionsCsvReader.CsvReadResult.EmptyCsv
-import org.transactions_task.api.service.TransactionsCsvReader.CsvReadResult.MissingCsvField
-import org.transactions_task.api.service.TransactionsCsvReader.CsvReadResult.Success
-import org.transactions_task.api.service.TransactionsCsvReader.CsvReadResult.WrongCsvHeader
-import org.transactions_task.api.service.TransactionsCsvReader.CsvReadResult.WrongCsvLine
-import org.transactions_task.api.service.PostTransactionsService.ProcessResult.*
+import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.EmptyCsv
+import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.MissingCsvField
+import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.Success
+import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.WrongCsvHeader
+import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.WrongCsvLine
+import org.transactions_task.service.PostTransactionsService.ProcessResult.*
 import java.io.InputStream
 
 class PostTransactionsService {

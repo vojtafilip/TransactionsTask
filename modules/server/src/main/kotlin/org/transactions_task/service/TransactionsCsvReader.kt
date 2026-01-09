@@ -1,7 +1,9 @@
-package org.transactions_task.api.service
+package org.transactions_task.service
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.util.CSVFieldNumDifferentException
+import org.transactions_task.domain.model.Currency
+import org.transactions_task.domain.model.TransactionRecord
 import java.io.InputStream
 import kotlin.time.Instant
 
@@ -15,13 +17,13 @@ class TransactionsCsvReader {
         data object EmptyCsv : CsvReadResult()
         data class MissingCsvField(val message: String) : CsvReadResult()
         data class WrongCsvLine(val message: String) : CsvReadResult()
-        data class Success(val transactions: List<TransactionLine>) : CsvReadResult()
+        data class Success(val transactions: List<TransactionRecord>) : CsvReadResult()
     }
 
     fun read(ips: InputStream): CsvReadResult {
         // TODO use csvReader.open(ips) and readAllWithHeaderAsSequence() to read as stream
 
-        val transactions: List<TransactionLine> =
+        val transactions: List<TransactionRecord> =
             try {
                 readCsv(ips)
             } catch (e: NoSuchElementException) {
@@ -39,11 +41,11 @@ class TransactionsCsvReader {
         return CsvReadResult.Success(transactions)
     }
 
-    private fun readCsv(ips: InputStream): List<TransactionLine> =
+    private fun readCsv(ips: InputStream): List<TransactionRecord> =
         csvReader
             .readAllWithHeader(ips)
             .map { CsvLine(it) }
-            .map { it.toTransactionLine() }
+            .map { it.toTransactionRecord() }
 
 }
 
@@ -55,13 +57,13 @@ private class CsvLine(map: Map<String, String>) {
     val description: String by map
 }
 
-private fun CsvLine.toTransactionLine() =
+private fun CsvLine.toTransactionRecord() =
     try {
-        TransactionLine(
+        TransactionRecord(
             reference.toLong(),
             Instant.parse(timestamp),
             amount.toLong(),
-            if (currency == "CZK") TransactionLine.Currency.CZK else error("Wrong currency"), // TODO use sophisticated parsing
+            if (currency == "CZK") Currency.CZK else error("Wrong currency"), // TODO use sophisticated parsing
             description.ifBlank { null }
                 ?.trim()
         )
@@ -75,18 +77,3 @@ private class WrongCsvLineException(
     message: String,
     cause: Throwable
 ) : Exception(message, cause)
-
-// TODO move to a model
-data class TransactionLine(
-    val reference: Long,
-    val timestamp: Instant,
-    val amount: Long,
-    val currency: Currency,
-    val description: String?
-) {
-
-    // TODO separate
-    enum class Currency {
-        CZK
-    }
-}

@@ -20,8 +20,8 @@ import io.ktor.utils.io.jvm.javaio.toInputStream
 import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
 import org.transactions_task.TRANSACTIONS_FILE_SIZE_LIMIT
-import org.transactions_task.api.service.GetTransactionsService
-import org.transactions_task.api.service.PostTransactionsService
+import org.transactions_task.service.GetTransactionsService
+import org.transactions_task.service.PostTransactionsService
 
 
 object Routes {
