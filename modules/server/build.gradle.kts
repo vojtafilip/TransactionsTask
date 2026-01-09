@@ -23,6 +23,8 @@ dependencies {
     implementation(libs.ktor.serverContentNegotiation)
     implementation(libs.ktor.serializationJson)
     implementation(libs.kotlinCsv)
+    implementation(libs.koin)
+    implementation(libs.koinLogger)
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
 }

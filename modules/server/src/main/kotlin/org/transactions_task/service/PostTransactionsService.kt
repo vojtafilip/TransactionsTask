@@ -1,5 +1,6 @@
 package org.transactions_task.service
 
+import org.transactions_task.repository.TransactionsRepository
 import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.EmptyCsv
 import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.MissingCsvField
 import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.Success
@@ -8,7 +9,9 @@ import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.WrongCs
 import org.transactions_task.service.PostTransactionsService.ProcessResult.*
 import java.io.InputStream
 
-class PostTransactionsService {
+class PostTransactionsService(
+    private val transactionsRepository: TransactionsRepository
+) {
     private val transactionsCsvReader = TransactionsCsvReader()
 
     sealed class ProcessResult() {
@@ -35,6 +38,8 @@ class PostTransactionsService {
             }
 
             is Success -> {
+                val insertResult = transactionsRepository.insertTransactions(result.transactions)
+
                 // TODO process transactions...
                 // TODO send result message
                 return ProcessResult.Success

@@ -17,6 +17,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import org.koin.ktor.ext.inject
 import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
 import org.transactions_task.TRANSACTIONS_FILE_SIZE_LIMIT
@@ -36,9 +37,12 @@ fun Application.configureRouting() {
         }
 
         route(Routes.TRANSACTIONS) {
+            val postTransactionsService by inject<PostTransactionsService>()
+            val getTransactionsService by inject<GetTransactionsService>()
+
             setupTransactionsPostBodyLimit()
-            post { processTransactionsPost() }
-            get { processTransactionsGet() }
+            post { processTransactionsPost(postTransactionsService) }
+            get { processTransactionsGet(getTransactionsService) }
         }
     }
 
@@ -55,11 +59,10 @@ private fun Route.setupTransactionsPostBodyLimit() {
     }
 }
 
-private suspend fun RoutingContext.processTransactionsPost() {
+private suspend fun RoutingContext.processTransactionsPost(
+    postTransactionsService: PostTransactionsService
+) {
     if (!isCsvContentType()) return
-
-    // TODO get by DI
-    val postTransactionsService = PostTransactionsService()
 
     val ips = call.receiveChannel().toInputStream()
 
@@ -88,10 +91,9 @@ private suspend fun RoutingContext.isCsvContentType(): Boolean {
     return true
 }
 
-private suspend fun RoutingContext.processTransactionsGet() {
-
-    // TODO get by DI
-    val getTransactionsService = GetTransactionsService()
+private suspend fun RoutingContext.processTransactionsGet(
+    getTransactionsService: GetTransactionsService
+) {
 
     // TODO use mapper to DTO
     val x = getTransactionsService.getTransactions()

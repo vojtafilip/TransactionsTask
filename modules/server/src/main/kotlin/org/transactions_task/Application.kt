@@ -5,6 +5,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import org.transactions_task.api.configureRouting
 import org.transactions_task.api.configureSerialization
+import org.transactions_task.di.configureKoin
 
 
 fun main() {
@@ -13,6 +14,7 @@ fun main() {
 }
 
 fun Application.module() {
+    configureKoin()
     configureSerialization()
     configureRouting()
 }
