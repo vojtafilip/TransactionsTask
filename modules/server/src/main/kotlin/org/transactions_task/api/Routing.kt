@@ -20,6 +20,7 @@ import io.ktor.utils.io.jvm.javaio.toInputStream
 import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
 import org.transactions_task.TRANSACTIONS_FILE_SIZE_LIMIT
+import org.transactions_task.api.TransactionsCsvReader.CsvReadResult.*
 
 
 object Routes {
@@ -44,28 +45,30 @@ fun Application.configureRouting() {
                 val ips = call.receiveChannel().toInputStream()
 
                 when (val result = transactionsCsvReader.read(ips)) {
-                    is TransactionsCsvReader.CsvReadResult.WrongCsvHeader -> {
+                    is WrongCsvHeader -> {
                         call.respond(HttpStatusCode.BadRequest, result.message)
                         return@post
                     }
 
-                    is TransactionsCsvReader.CsvReadResult.MissingCsvField -> {
+                    is MissingCsvField -> {
                         call.respond(HttpStatusCode.BadRequest, result.message)
                         return@post
                     }
 
-                    is TransactionsCsvReader.CsvReadResult.EmptyCsv -> {
+                    is WrongCsvLine -> {
+                        call.respond(HttpStatusCode.BadRequest, result.message)
+                        return@post
+                    }
+
+                    is EmptyCsv -> {
                         call.respond(HttpStatusCode.BadRequest, "Empty CSV file.")
                         return@post
                     }
 
-//                    is TransactionsCsvReader.CsvReadResult.MissingCsvField -> TODO()
-//                    is TransactionsCsvReader.CsvReadResult.Success -> TODO()
-                    else -> {
-                        // nothing now ... TODO to be removed
+                    is Success -> {
+                        // nothing now ... TODO process transactions...
                     }
                 }
-                // TODO process other results...
 
                 call.respondText(Strings.OK)
             }

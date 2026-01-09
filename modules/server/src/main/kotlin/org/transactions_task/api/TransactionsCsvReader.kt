@@ -14,6 +14,7 @@ class TransactionsCsvReader {
         data class WrongCsvHeader(val message: String) : CsvReadResult()
         data object EmptyCsv : CsvReadResult()
         data class MissingCsvField(val message: String) : CsvReadResult()
+        data class WrongCsvLine(val message: String) : CsvReadResult()
         data class Success(val transactions: List<TransactionLine>) : CsvReadResult()
     }
 
@@ -28,6 +29,9 @@ class TransactionsCsvReader {
             } catch (e: CSVFieldNumDifferentException) {
                 // TODO setup csvReader with insufficientFieldsRowBehaviour and excessFieldsRowBehaviour and check it for each line
                 return CsvReadResult.MissingCsvField(e.message ?: "Unknown error")
+            } catch (e: WrongCsvLineException) {
+                // TODO log to logger, propagate info about line
+                return CsvReadResult.WrongCsvLine(e.message ?: "Unknown error")
             }
 
         if (transactions.isEmpty()) return CsvReadResult.EmptyCsv
@@ -52,13 +56,25 @@ private class CsvLine(map: Map<String, String>) {
 }
 
 private fun CsvLine.toTransactionLine() =
-    TransactionLine(
-        reference.toLong(),
-        Instant.parse(timestamp),
-        amount.toLong(),
-        if (currency == "CZK") TransactionLine.Currency.CZK else error("Wrong currency"), // TODO use sophisticated parsing
-        description.ifBlank { null }
-    )
+    try {
+        TransactionLine(
+            reference.toLong(),
+            Instant.parse(timestamp),
+            amount.toLong(),
+            if (currency == "CZK") TransactionLine.Currency.CZK else error("Wrong currency"), // TODO use sophisticated parsing
+            description.ifBlank { null }
+                ?.trim()
+        )
+    } catch (e: NoSuchElementException) {
+        throw e
+    } catch (e: Exception) {
+        throw WrongCsvLineException("Failed to parse CSV line.", e)
+    }
+
+private class WrongCsvLineException(
+    message: String,
+    cause: Throwable
+) : Exception(message, cause)
 
 // TODO move to a model
 data class TransactionLine(

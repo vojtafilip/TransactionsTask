@@ -121,4 +121,27 @@ class TransactionsPostApiFailsSpecification {
             response.bodyAsText()
         )
     }
+
+    // TODO test each field
+    // TODO later: should not fail, just one line to be reported
+    @Test
+    fun `should fail on wrong field format`() = testApplication {
+        // given
+        setupApplicationModule()
+        val requestBody = """
+            reference,timestamp,amount,currency,description
+            WRONG,2023-01-11T09:00:00Z,-100,CZK,Lekárna Hradčanská
+        """
+            .trimIndent()
+
+        // when
+        val response = postTransactions(requestBody)
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals(
+            "Failed to parse CSV line.",
+            response.bodyAsText()
+        )
+    }
 }
