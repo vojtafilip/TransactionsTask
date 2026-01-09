@@ -3,14 +3,23 @@ package org.transactions_task
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.application.Application
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.bodylimit.RequestBodyLimit
 import io.ktor.server.request.contentType
 import io.ktor.server.request.httpMethod
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.request.receiveChannel
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
+import io.ktor.utils.io.jvm.javaio.toInputStream
+
 
 fun main() {
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
@@ -27,6 +36,29 @@ fun Application.module() {
             setupTransactionsBodyLimit()
             post {
                 if (!isCsvContentType()) return@post
+
+                // TODO get by DI
+                val transactionsCsvReader = TransactionsCsvReader()
+
+                val ips = call.receiveChannel().toInputStream()
+
+                when (val result = transactionsCsvReader.read(ips)) {
+                    is TransactionsCsvReader.CsvReadResult.WrongCsvHeader -> {
+                        call.respond(HttpStatusCode.BadRequest, result.message)
+                        return@post
+                    }
+                    is TransactionsCsvReader.CsvReadResult.EmptyCsv -> {
+                        call.respond(HttpStatusCode.BadRequest, "Empty CSV file")
+                        return@post
+                    }
+
+//                    is TransactionsCsvReader.CsvReadResult.MissingCsvField -> TODO()
+//                    is TransactionsCsvReader.CsvReadResult.Success -> TODO()
+                    else -> {
+                        // nothing now ... TODO to be removed
+                    }
+                }
+                // TODO process other results...
 
                 call.respondText(Strings.OK)
             }

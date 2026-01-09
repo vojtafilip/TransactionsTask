@@ -51,4 +51,30 @@ class TransactionsPostApiFailsSpecification {
         // then
         assertEquals(HttpStatusCode.UnsupportedMediaType, response.status)
     }
+
+    @Test
+    fun `should fail on wrong format`() = testApplication {
+        // given
+        setupApplicationModule()
+        val requestBody = "this is not CSV file\nhas no records"
+
+        // when
+        val response = postTransactions(requestBody)
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `should fail on empty CSV`() = testApplication {
+        // given
+        setupApplicationModule()
+        val requestBody = "reference,timestamp,amount,currency,description"
+
+        // when
+        val response = postTransactions(requestBody)
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
 }
