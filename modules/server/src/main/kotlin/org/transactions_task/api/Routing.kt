@@ -21,6 +21,7 @@ import org.koin.ktor.ext.inject
 import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
 import org.transactions_task.TRANSACTIONS_FILE_SIZE_LIMIT
+import org.transactions_task.api.dto.TransactionsPostResponseDTO
 import org.transactions_task.service.GetTransactionsService
 import org.transactions_task.service.PostTransactionsService
 
@@ -69,13 +70,12 @@ private suspend fun RoutingContext.processTransactionsPost(
     when (val result = postTransactionsService.process(ips)) {
         is PostTransactionsService.ProcessResult.BadRequest -> {
             call.respond(HttpStatusCode.BadRequest, result.message)
-            return
         }
 
         is PostTransactionsService.ProcessResult.Success -> {
-            // TODO send result message
-            call.respondText(Strings.OK)
-            return
+            call.respond(HttpStatusCode.OK, TransactionsPostResponseDTO(
+                result.insertedCount, result.failedToInsert.map { it.ref }
+            ))
         }
     }
 }

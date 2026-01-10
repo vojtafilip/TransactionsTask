@@ -3,7 +3,7 @@ package org.transactions_task.api.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TransactionsResponseDTO(
+data class TransactionsGetResponseDTO(
 //    val account: Long // TODO some additional info?
     val sortedTransactions: List<TransactionDTO>
 ) {

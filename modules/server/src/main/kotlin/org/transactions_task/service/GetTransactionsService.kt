@@ -1,20 +1,20 @@
 package org.transactions_task.service
 
-import org.transactions_task.api.dto.TransactionsResponseDTO
+import org.transactions_task.api.dto.TransactionsGetResponseDTO
 
 class GetTransactionsService {
 
     // TODO not DTO ... another structure and them mapper to DTO in routing
     // TODO rename
-    data class Result(val transactions: TransactionsResponseDTO)
+    data class Result(val transactions: TransactionsGetResponseDTO)
 
     fun getTransactions(): Result  {
 
         // TODO implement
 
-        val responseDTO = TransactionsResponseDTO(
+        val responseDTO = TransactionsGetResponseDTO(
             listOf(
-                TransactionsResponseDTO.TransactionDTO( "2023-01-11T03:00:01Z", 1000, "description", false)
+                TransactionsGetResponseDTO.TransactionDTO( "2023-01-11T03:00:01Z", 1000, "description", false)
             )
         )
 

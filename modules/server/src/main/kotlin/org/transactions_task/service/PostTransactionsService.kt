@@ -1,5 +1,6 @@
 package org.transactions_task.service
 
+import org.transactions_task.domain.model.Reference
 import org.transactions_task.repository.TransactionsRepository
 import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.EmptyCsv
 import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.MissingCsvField
@@ -16,7 +17,10 @@ class PostTransactionsService(
 
     sealed class ProcessResult() {
         data class BadRequest(val message: String) : ProcessResult()
-        data object Success : ProcessResult()
+        data class Success(
+            val insertedCount: Int,
+            val failedToInsert: List<Reference>
+        ) : ProcessResult()
     }
 
     fun process(csvInputStream: InputStream): ProcessResult {
@@ -40,9 +44,10 @@ class PostTransactionsService(
             is Success -> {
                 val insertResult = transactionsRepository.insertTransactions(result.transactions)
 
-                // TODO process transactions...
-                // TODO send result message
-                return ProcessResult.Success
+                return Success(
+                    insertResult.insertedCount,
+                    insertResult.failedToInsert
+                )
             }
         }
     }
