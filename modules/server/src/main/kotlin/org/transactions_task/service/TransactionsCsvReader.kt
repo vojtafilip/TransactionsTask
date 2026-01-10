@@ -3,6 +3,7 @@ package org.transactions_task.service
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.util.CSVFieldNumDifferentException
 import org.transactions_task.domain.model.Currency
+import org.transactions_task.domain.model.Reference
 import org.transactions_task.domain.model.TransactionRecord
 import java.io.InputStream
 import kotlin.time.Instant
@@ -60,7 +61,7 @@ private class CsvLine(map: Map<String, String>) {
 private fun CsvLine.toTransactionRecord() =
     try {
         TransactionRecord(
-            reference.toLong(),
+            Reference(reference.toLong()),
             Instant.parse(timestamp),
             amount.toLong(),
             if (currency == "CZK") Currency.CZK else error("Wrong currency"), // TODO use sophisticated parsing
