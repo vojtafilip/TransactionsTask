@@ -7,8 +7,8 @@ import org.transactions_task.domain.model.Currency
 
 object TransactionsTable: IntIdTable("transactions") {
     val reference = long("reference").uniqueIndex()
-    val timestamp = timestamp("timestamp")
-    val amount = long("amount")
+    val timestamp = timestamp("timestamp").index()
+    val amount = long("amount").index()
     val currency = enumerationByName("currency", 10, Currency::class)
     val description = varchar("description", 50).nullable() // TODO check length at validation
 

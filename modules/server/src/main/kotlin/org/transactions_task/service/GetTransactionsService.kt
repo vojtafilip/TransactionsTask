@@ -1,8 +1,11 @@
 package org.transactions_task.service
 
 import org.transactions_task.api.dto.TransactionsGetResponseDTO
+import org.transactions_task.repository.TransactionsRepository
 
-class GetTransactionsService {
+class GetTransactionsService(
+    private val transactionsRepository: TransactionsRepository
+) {
 
     // TODO not DTO ... another structure and them mapper to DTO in routing
     // TODO rename
@@ -10,12 +13,17 @@ class GetTransactionsService {
 
     fun getTransactions(): Result  {
 
-        // TODO implement
+        val sortedTransactionsResult = transactionsRepository.getSortedTransactions()
 
         val responseDTO = TransactionsGetResponseDTO(
-            listOf(
-                TransactionsGetResponseDTO.TransactionDTO( "2023-01-11T03:00:01Z", 1000, "description", false)
-            )
+            sortedTransactionsResult.sortedTransactions.map {
+                TransactionsGetResponseDTO.TransactionDTO(
+                    timestamp = it.timestamp.toString(), // TODO date time format
+                    amount = it.amount,
+                    description = it.description ?: "",
+                    isBiggest = it.amount == sortedTransactionsResult.maxAmount
+                )
+            }
         )
 
         return Result(responseDTO)

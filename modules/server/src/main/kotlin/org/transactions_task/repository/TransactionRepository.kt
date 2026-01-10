@@ -12,6 +12,11 @@ interface TransactionsRepository {
 
     fun insertTransactions(transactions: List<TransactionRecord>): InsertResult
 
-    fun getSortedTransactions(): List<TransactionRecord>
+    data class GetSortedTransactionsResult(
+        val sortedTransactions: List<TransactionRecord>,
+        val maxAmount: Long?
+    )
+
+    fun getSortedTransactions(): GetSortedTransactionsResult
 }
 
