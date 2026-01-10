@@ -1,0 +1,17 @@
+package org.transactions_task.repository
+
+import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
+import org.jetbrains.exposed.v1.datetime.CurrentTimestamp
+import org.jetbrains.exposed.v1.datetime.timestamp
+import org.transactions_task.domain.model.Currency
+
+object TransactionsTable: IntIdTable("transactions") {
+    val reference = long("reference").uniqueIndex()
+    val timestamp = timestamp("timestamp")
+    val amount = long("amount")
+    val currency = enumerationByName("currency", 10, Currency::class)
+    val description = varchar("description", 50).nullable() // TODO check length at validation
+
+    val dbCreated = timestamp("db_created").defaultExpression(CurrentTimestamp)
+    // TODO other technical fields
+}

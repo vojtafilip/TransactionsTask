@@ -25,6 +25,10 @@ dependencies {
     implementation(libs.kotlinCsv)
     implementation(libs.koin)
     implementation(libs.koinLogger)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.datetime)
+    implementation(libs.h2)
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
 }
