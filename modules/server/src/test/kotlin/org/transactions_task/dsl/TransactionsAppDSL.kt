@@ -10,7 +10,7 @@ import org.transactions_task.module
 
 fun ApplicationTestBuilder.setupApplicationModule() {
     application {
-        module()
+        module(testing = true)
     }
 }
 

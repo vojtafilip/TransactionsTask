@@ -14,9 +14,9 @@ fun main() {
         .start(wait = true)
 }
 
-fun Application.module() {
+fun Application.module(testing: Boolean = false) {
     configureKoin()
-    configureDatabase()
+    configureDatabase(dropTables = testing)
     configureSerialization()
     configureRouting()
 }
