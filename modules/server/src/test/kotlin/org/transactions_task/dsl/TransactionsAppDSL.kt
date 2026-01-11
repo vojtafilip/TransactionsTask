@@ -1,5 +1,6 @@
 package org.transactions_task.dsl
 
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -22,3 +23,6 @@ suspend fun ApplicationTestBuilder.postTransactions(
         contentType(contentType)
         setBody(requestBody)
     }
+
+suspend fun ApplicationTestBuilder.getTransactions(): HttpResponse =
+    client.get("/transactions")
