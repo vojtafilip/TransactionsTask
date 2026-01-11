@@ -19,7 +19,7 @@ class ExposedTransactionsRepository : TransactionsRepository {
         var insertedCount = 0
         val failedToInsert = mutableListOf<Reference>()
 
-        // TODO for all or to each record?
+        // TODO for each record, change to suspendTransaction
         transaction {
 
             transactions.forEach { transaction ->

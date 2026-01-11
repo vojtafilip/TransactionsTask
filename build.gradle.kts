@@ -6,5 +6,5 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.ktor) apply false
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0" // TODO correct version
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0" // Keep consistent with the Kotlin version
 }
