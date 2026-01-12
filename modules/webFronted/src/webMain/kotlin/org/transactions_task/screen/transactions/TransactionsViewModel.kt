@@ -6,13 +6,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.format
+import kotlinx.datetime.format.DateTimeComponents
 import org.transactions_task.model.Transaction
 import org.transactions_task.repository.RepositoryLoadingState
 import org.transactions_task.repository.TransactionsRepository
 
 data class TransactionVM(
     val timestamp: String,
-    val amount: Long,
+    val amount: String,
     val description: String,
     val isBiggest: Boolean
 )
@@ -51,8 +53,8 @@ private fun RepositoryLoadingState.toUiState() = when (this) {
 }
 
 private fun Transaction.toVM() = TransactionVM(
-    timestamp = timestamp,
-    amount = amount,
+    timestamp = timestamp.format(DateTimeComponents.Formats.RFC_1123), // TODO nicer format
+    amount = amount.toString(),
     description = description,
     isBiggest = isBiggest
 )

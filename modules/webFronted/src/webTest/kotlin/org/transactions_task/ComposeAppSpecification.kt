@@ -6,10 +6,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.delay
 import org.transactions_task.api.Api
+import org.transactions_task.model.Transaction
 import org.transactions_task.repository.TransactionsRepository
 import org.transactions_task.screen.transactions.TransactionsScreen
 import org.transactions_task.screen.transactions.TransactionsViewModel
 import kotlin.test.Test
+import kotlin.time.Clock
 
 @OptIn(ExperimentalTestApi::class)
 class ComposeAppSpecification {
@@ -23,7 +25,6 @@ class ComposeAppSpecification {
     }
 
     @Test
-
     fun `should show error indicator on loading error`() = runComposeUiTest {
         setContent {
             TransactionsScreen(
@@ -36,6 +37,34 @@ class ComposeAppSpecification {
         // then
         onNodeWithTag("errorIndicator").assertExists()
         onNodeWithText("test error").assertExists()
+    }
+
+    @Test
+    fun `should show transaction on successful loading`() = runComposeUiTest {
+        // given
+        val transactions = (1..10).map {
+            Transaction(
+                timestamp = Clock.System.now(),
+                amount = it.toLong(),
+                description = "transaction $it",
+                isBiggest = false
+            )
+        }
+
+        // when
+        setContent {
+            TransactionsScreen(
+                createViewModel(
+                    Api.LoadResponse.Success(transactions)
+                )
+            )
+        }
+
+        // then
+        onNodeWithTag("transactionsList").assertExists()
+        onNodeWithText("transaction 1").assertExists()
+        onNodeWithText("transaction 5").assertExists()
+        onNodeWithText("transaction 10").assertExists()
     }
 }
 

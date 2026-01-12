@@ -3,8 +3,8 @@ package org.transactions_task.screen.transactions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import org.transactions_task.di.viewModel
 import org.transactions_task.screen.transactions.view.ErrorIndicator
 import org.transactions_task.screen.transactions.view.LoadingIndicator
+import org.transactions_task.screen.transactions.view.TransactionsList
 
 @Composable
 fun TransactionsScreen(
@@ -39,13 +40,14 @@ private fun TransactionsContent(uiState: UiState) {
     Column(
         modifier = Modifier
             .padding(16.dp)
-            .width(500.dp)
+            .width(1000.dp)
             .background(Color.White)
     ) {
         Text(
             text = "Transactions",
             fontSize = 24.sp,
         )
+        HorizontalDivider()
 
         when (uiState) {
             is UiState.Loading -> LoadingIndicator(
@@ -61,7 +63,10 @@ private fun TransactionsContent(uiState: UiState) {
                 message = uiState.message
             )
 
-            is UiState.Success -> TODO()
+            is UiState.Success -> TransactionsList(
+                modifier = Modifier.padding(16.dp),
+                transactions = uiState.transactions
+            )
         }
     }
 }

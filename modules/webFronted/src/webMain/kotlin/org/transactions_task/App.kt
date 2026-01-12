@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import org.transactions_task.screen.transactions.TransactionsScreen
 
 @Composable
@@ -14,9 +16,10 @@ fun App() {
     MaterialTheme {
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(Color.Black)
                 .safeContentPadding()
                 .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // TODO navigations ... when app hes more screens
 

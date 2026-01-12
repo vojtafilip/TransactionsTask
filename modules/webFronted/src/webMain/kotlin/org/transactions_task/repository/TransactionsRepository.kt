@@ -22,9 +22,14 @@ class TransactionsRepository(
         scope: CoroutineScope
     ): StateFlow<RepositoryLoadingState> = flow {
         emit(RepositoryLoadingState.Loading)
-        emit(when (val result = api.loadTransactions()) {
+
+        val loadingState = when (
+            val result = api.loadTransactions()
+        ) {
             is Api.LoadResponse.Error -> RepositoryLoadingState.Error(result.message)
-            is Api.LoadResponse.Success -> TODO()
-        })
+            is Api.LoadResponse.Success -> RepositoryLoadingState.Success(result.transactions)
+        }
+
+        emit(loadingState)
     }.stateIn(scope)
 }
