@@ -1,31 +1,27 @@
 package org.transactions_task.service
 
-import org.transactions_task.api.dto.TransactionsGetResponseDTO
+import org.transactions_task.domain.model.Reference
+import org.transactions_task.domain.model.TransactionRecord
 import org.transactions_task.repository.TransactionsRepository
 
 class GetTransactionsService(
     private val transactionsRepository: TransactionsRepository
 ) {
 
-    // TODO not DTO ... another structure and them mapper to DTO in routing
-    // TODO rename
-    data class Result(val transactions: TransactionsGetResponseDTO)
+    data class GetTransactionsResult(
+        val sortedTransactions: List<TransactionRecord>,
+        val markedTransactions: List<Reference>,
+    )
 
-    fun getTransactions(): Result  {
-
+    fun getTransactions(): GetTransactionsResult {
         val sortedTransactionsResult = transactionsRepository.getSortedTransactions()
+        val markedTransactions = sortedTransactionsResult.sortedTransactions
+            .filter { it.amount == sortedTransactionsResult.maxAmount }
+            .map { it.reference }
 
-        val responseDTO = TransactionsGetResponseDTO(
-            sortedTransactionsResult.sortedTransactions.map {
-                TransactionsGetResponseDTO.TransactionDTO(
-                    timestamp = it.timestamp.toString(), // TODO date time format
-                    amount = it.amount,
-                    description = it.description ?: "",
-                    isBiggest = it.amount == sortedTransactionsResult.maxAmount
-                )
-            }
+        return GetTransactionsResult(
+            sortedTransactionsResult.sortedTransactions,
+            markedTransactions
         )
-
-        return Result(responseDTO)
     }
 }

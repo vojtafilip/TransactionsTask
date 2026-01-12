@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
     implementation(libs.ktor.serverBodyLimit)
+    implementation(libs.ktor.serverHtmlBuilder)
     implementation(libs.ktor.serverContentNegotiation)
     implementation(libs.ktor.serializationJson)
     implementation(libs.kotlinCsv)

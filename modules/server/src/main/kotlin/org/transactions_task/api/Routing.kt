@@ -4,6 +4,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
+import io.ktor.server.html.respondHtml
 import io.ktor.server.plugins.bodylimit.RequestBodyLimit
 import io.ktor.server.request.contentType
 import io.ktor.server.request.httpMethod
@@ -73,9 +74,12 @@ private suspend fun RoutingContext.processTransactionsPost(
         }
 
         is PostTransactionsService.ProcessResult.Success -> {
-            call.respond(HttpStatusCode.OK, TransactionsPostResponseDTO(
-                result.insertedCount, result.failedToInsert.map { it.ref }
-            ))
+            call.respond(
+                HttpStatusCode.OK,
+                TransactionsPostResponseDTO(
+                    result.insertedCount,
+                    result.failedToInsert.map { it.ref }
+                ))
         }
     }
 }
@@ -94,10 +98,20 @@ private suspend fun RoutingContext.isCsvContentType(): Boolean {
 private suspend fun RoutingContext.processTransactionsGet(
     getTransactionsService: GetTransactionsService
 ) {
+    val format = call.request.queryParameters["format"]
 
-    // TODO use mapper to DTO
-    val x = getTransactionsService.getTransactions()
-    val responseDTO = x.transactions
+    val getTransactionsResult = getTransactionsService.getTransactions()
 
-    call.respond(HttpStatusCode.OK, responseDTO)
+    if (format == "json") {
+        call.respond(
+            HttpStatusCode.OK,
+            getTransactionsResult.toDTO()
+        )
+    } else {
+        call.respondHtml(
+            HttpStatusCode.OK
+        ) {
+            transactionsResultToHtml(getTransactionsResult)
+        }
+    }
 }

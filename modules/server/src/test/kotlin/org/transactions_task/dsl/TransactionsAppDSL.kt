@@ -25,4 +25,4 @@ suspend fun ApplicationTestBuilder.postTransactions(
     }
 
 suspend fun ApplicationTestBuilder.getTransactions(): HttpResponse =
-    client.get("/transactions")
+    client.get("/transactions?format=json")
