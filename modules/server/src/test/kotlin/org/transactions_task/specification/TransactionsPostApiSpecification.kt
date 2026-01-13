@@ -3,7 +3,7 @@ package org.transactions_task.specification
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import org.transactions_task.dsl.getTransactions
+import org.transactions_task.dsl.getTransactionsAsJson
 import org.transactions_task.dsl.postTransactions
 import org.transactions_task.dsl.setupApplicationModule
 import kotlin.test.Test
@@ -24,7 +24,7 @@ class TransactionsPostApiSpecification {
 
         // when
         val response1 = postTransactions(requestBody)
-        val response2 = getTransactions()
+        val response2 = getTransactionsAsJson()
 
         // then
         assertEquals(HttpStatusCode.OK, response1.status)
@@ -56,7 +56,7 @@ class TransactionsPostApiSpecification {
         // when
         val response1 = postTransactions(requestBody1)
         val response2 = postTransactions(requestBody2)
-        val response3 = getTransactions()
+        val response3 = getTransactionsAsJson()
 
         // then
         assertEquals(HttpStatusCode.OK, response1.status)
@@ -90,7 +90,7 @@ class TransactionsPostApiSpecification {
         // when
         val response1 = postTransactions(requestBody1)
         val response2 = postTransactions(requestBody2)
-        val response3 = getTransactions()
+        val response3 = getTransactionsAsJson()
 
         // then
         assertEquals(HttpStatusCode.OK, response1.status)

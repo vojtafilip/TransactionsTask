@@ -24,5 +24,5 @@ suspend fun ApplicationTestBuilder.postTransactions(
         setBody(requestBody)
     }
 
-suspend fun ApplicationTestBuilder.getTransactions(): HttpResponse =
+suspend fun ApplicationTestBuilder.getTransactionsAsJson(): HttpResponse =
     client.get("/transactions?format=json")

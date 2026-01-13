@@ -11,6 +11,7 @@ import org.transactions_task.domain.model.Reference
 import org.transactions_task.domain.model.TransactionRecord
 import org.transactions_task.repository.TransactionsRepository.GetSortedTransactionsResult
 import org.transactions_task.repository.TransactionsRepository.InsertResult
+import org.transactions_task.repository.database.TransactionsTable
 
 class ExposedTransactionsRepository : TransactionsRepository {
 

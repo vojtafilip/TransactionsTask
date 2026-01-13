@@ -6,7 +6,7 @@ import io.ktor.server.netty.Netty
 import org.transactions_task.api.configureRouting
 import org.transactions_task.api.configureSerialization
 import org.transactions_task.di.configureKoin
-import org.transactions_task.repository.configureDatabase
+import org.transactions_task.repository.database.configureDatabase
 
 
 fun main() {

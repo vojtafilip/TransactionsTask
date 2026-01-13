@@ -1,4 +1,4 @@
-package org.transactions_task.repository
+package org.transactions_task.repository.database
 
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.datetime.CurrentTimestamp
@@ -10,7 +10,7 @@ object TransactionsTable: IntIdTable("transactions") {
     val timestamp = timestamp("timestamp").index()
     val amount = long("amount").index()
     val currency = enumerationByName("currency", 10, Currency::class)
-    val description = varchar("description", 50).nullable() // TODO check length at validation
+    val description = varchar("description", 1024).nullable() // TODO check length at validation (add a const for length)
 
     val dbCreated = timestamp("db_created").defaultExpression(CurrentTimestamp)
     // TODO other technical fields

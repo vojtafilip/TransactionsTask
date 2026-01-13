@@ -68,7 +68,9 @@ private suspend fun RoutingContext.processTransactionsPost(
 
     val ips = call.receiveChannel().toInputStream()
 
-    when (val result = postTransactionsService.process(ips)) {
+    when (
+        val result = postTransactionsService.process(ips)
+    ) {
         is PostTransactionsService.ProcessResult.BadRequest -> {
             call.respond(HttpStatusCode.BadRequest, result.message)
         }
