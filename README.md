@@ -1,61 +1,57 @@
-This is a Kotlin Multiplatform project targeting Web, Server.
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+# Transactions Task
 
-* [/server](./server/src/main/kotlin) is for the Ktor server application.
+This is a Kotlin Multiplatform project.
+See https://gist.github.com/maio/7ff652b8f27ae0513ad609107ce5c3fe for requirements.
 
-* [/shared](./shared/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
 
-### Build and Run Server
+### Notes
 
-To build and run the development version of the server, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
+* project uses in-memory database H2. Possible to configure another database in application.conf
+* no authentication
+* no https – may be configured in application.conf
+* size of the CSV file is limited to 1000000 bytes, may be configured in application.conf
+* server part contains the complete solution for given requirements. webFrontend is just a demo in Kotlin Compose for Web, which calls the server.
+
+### Project modules
+
+* [/modules/server](./modules/server/src/main/kotlin) is for the Ktor server application.
+
+* [/modules/webFrontend](./modules/webFrontend/src) Compose web app, frontend for the server.
+
+
+### Build and Run
+
+#### server (Ktor application):
   ```shell
-  ./gradlew :server:run
+  ./gradlew :modules:server:run
   ```
-- on Windows
+* Now you can access the server at http://localhost:5000/
+* Use POST http://localhost:5000/transactions to upload CSV file.
+* Use GET http://localhost:5000/transactions to see transactions as HTML.
+* Use GET http://localhost:5000/transactions?format=json to see transactions as JSON.
+
+####  web frontend (Compose app):
   ```shell
-  .\gradlew.bat :server:run
+  ./gradlew :modules:webFrontend:wasmJsBrowserDevelopmentRun
   ```
 
-### Build and Run Web Application
+* Now you can access the frontend at http://localhost:8080/
 
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE's toolbar or run it directly from the terminal:
-- for the Wasm target (faster, modern browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-- for the JS target (slower, supports older browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:jsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
-    ```
+####  server tests:
+  ```shell
+  ./gradlew :modules:server:test
+  ```
 
----
+#### web frontend tests:
+Set CHROME_BIN env variable (e.g. CHROME_BIN=/snap/bin/chromium)
+  ```shell
+  ./gradlew :modules:webFrontend:cleanWasmJsBrowserTest :modules:webFrontend:wasmJsBrowserTest
+  ```
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+### Run manual test
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+1. Start server
+2. Run script uploadTestFile.sh in [/manual_tests](./manual_tests)
+3. Check transactions in browser: http://localhost:5000/transactions
+4. Try with your CSV files...
