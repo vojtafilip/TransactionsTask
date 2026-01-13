@@ -31,92 +31,101 @@ fun TransactionsList(
     ) {
         Text("All transactions:")
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(2.dp)
-        ) {
-            Text(
-                text = "Timestamp",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .weight(2f)
-                    .padding(10.dp)
-            )
-            Text(
-                text = "Amount",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(10.dp)
-            )
-            Text(
-                text = "Description",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .weight(3f)
-                    .padding(10.dp)
-            )
-        }
-
-        // TODO scrollbar
+        ListHeader()
         LazyColumn {
+            // TODO scrollbar
             items(transactions) { transaction ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(2.dp)
-                        .background(if (transaction.isBiggest) Color.Green else Color.White)
-                ) {
-                    if (transaction.isBiggest) {
-                        Text(
-                            text = "X",
-                            modifier = Modifier
-                                .width(16.dp)
-                                .padding(vertical = 10.dp)
-                                .testTag("biggestTransaction - ${transaction.amount}")
-                        )
-                    } else {
-                        Text(
-                            text = " ",
-                            modifier = Modifier
-                                .width(16.dp)
-                                .padding(vertical = 10.dp)
-                        )
-                    }
-                    Text(
-                        text = transaction.timestamp,
-                        modifier = Modifier
-                            .weight(2f)
-                            .padding(2.dp)
-                            .border(1.dp, Color.Black)
-                            .padding(8.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-
-                    )
-                    Text(
-                        text = transaction.amount,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(2.dp)
-                            .border(1.dp, Color.Black)
-                            .padding(8.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = transaction.description,
-                        modifier = Modifier
-                            .weight(3f)
-                            .padding(2.dp)
-                            .border(1.dp, Color.Black)
-                            .padding(8.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                ListRow(transaction)
             }
         }
+    }
+}
+
+@Composable
+private fun ListHeader() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+    ) {
+        Text(
+            text = "Timestamp",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .weight(2f)
+                .padding(10.dp)
+        )
+        Text(
+            text = "Amount",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .weight(1f)
+                .padding(10.dp)
+        )
+        Text(
+            text = "Description",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .weight(3f)
+                .padding(10.dp)
+        )
+    }
+}
+
+@Composable
+private fun ListRow(transaction: TransactionVM) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .background(if (transaction.isBiggest) Color.Green else Color.White)
+    ) {
+        if (transaction.isBiggest) {
+            Text(
+                text = "X",
+                modifier = Modifier
+                    .width(16.dp)
+                    .padding(vertical = 10.dp)
+                    .testTag("biggestTransaction - ${transaction.amount}")
+            )
+        } else {
+            Text(
+                text = " ",
+                modifier = Modifier
+                    .width(16.dp)
+                    .padding(vertical = 10.dp)
+            )
+        }
+        Text(
+            text = transaction.timestamp,
+            modifier = Modifier
+                .weight(2f)
+                .padding(2.dp)
+                .border(1.dp, Color.Black)
+                .padding(8.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+
+        )
+        Text(
+            text = transaction.amount,
+            modifier = Modifier
+                .weight(1f)
+                .padding(2.dp)
+                .border(1.dp, Color.Black)
+                .padding(8.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = transaction.description,
+            modifier = Modifier
+                .weight(3f)
+                .padding(2.dp)
+                .border(1.dp, Color.Black)
+                .padding(8.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

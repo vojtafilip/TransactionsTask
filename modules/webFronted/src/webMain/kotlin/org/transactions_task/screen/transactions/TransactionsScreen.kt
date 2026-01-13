@@ -27,7 +27,6 @@ fun TransactionsScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        // TODO reload...
         viewModel.loadData()
     }
 
