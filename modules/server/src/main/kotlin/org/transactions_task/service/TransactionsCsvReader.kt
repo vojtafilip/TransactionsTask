@@ -2,11 +2,14 @@ package org.transactions_task.service
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.util.CSVFieldNumDifferentException
+import io.ktor.util.logging.KtorSimpleLogger
 import org.transactions_task.domain.model.Currency
 import org.transactions_task.domain.model.Reference
 import org.transactions_task.domain.model.TransactionRecord
 import java.io.InputStream
 import kotlin.time.Instant
+
+private val LOGGER = KtorSimpleLogger(TransactionsCsvReader::class.java.name)
 
 class TransactionsCsvReader {
     private val csvReader = csvReader {
@@ -33,6 +36,9 @@ class TransactionsCsvReader {
                 // TODO setup csvReader with insufficientFieldsRowBehaviour and excessFieldsRowBehaviour and check it for each line
                 return CsvReadResult.MissingCsvField(e.message ?: "Unknown error")
             } catch (e: WrongCsvLineException) {
+                // TODO move logger to more general place
+                LOGGER.error("Failed to parse CSV line ${e.lineNumber}.", e)
+
                 // TODO log to logger, propagate info about line
                 return CsvReadResult.WrongCsvLine(e.message ?: "Unknown error")
             }
@@ -46,7 +52,7 @@ class TransactionsCsvReader {
         csvReader
             .readAllWithHeader(ips)
             .map { CsvLine(it) }
-            .map { it.toTransactionRecord() }
+            .mapIndexed { i, line -> line.toTransactionRecord(i) }
 
 }
 
@@ -58,7 +64,7 @@ private class CsvLine(map: Map<String, String>) {
     val description: String by map
 }
 
-private fun CsvLine.toTransactionRecord() =
+private fun CsvLine.toTransactionRecord(lineNumber: Int) =
     try {
         TransactionRecord(
             Reference(reference.toLong()),
@@ -71,10 +77,11 @@ private fun CsvLine.toTransactionRecord() =
     } catch (e: NoSuchElementException) {
         throw e
     } catch (e: Exception) {
-        throw WrongCsvLineException("Failed to parse CSV line.", e)
+        throw WrongCsvLineException(lineNumber, "Failed to parse CSV line.", e)
     }
 
 private class WrongCsvLineException(
+    val lineNumber: Int,
     message: String,
     cause: Throwable
 ) : Exception(message, cause)
