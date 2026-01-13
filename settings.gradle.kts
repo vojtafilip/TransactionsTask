@@ -30,4 +30,3 @@ dependencyResolutionManagement {
 
 include("modules:webFrontend")
 include("modules:server")
-include("modules:shared")
