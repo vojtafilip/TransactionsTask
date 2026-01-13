@@ -81,8 +81,8 @@ private fun TBODY.renderTransactionRow(
         td {
             style = TD_STYLE
             val description = transaction.description ?: ""
+            // description length is already limited in DB
             +description
-            // TODO limit text to one line?
         }
     }
 }

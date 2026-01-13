@@ -21,7 +21,7 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // TODO navigations ... when app hes more screens
+            // TODO navigations ... when app has more screens
 
             TransactionsScreen()
         }
