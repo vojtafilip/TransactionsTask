@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -48,6 +49,7 @@ private fun ListHeader() {
             .fillMaxWidth()
             .padding(2.dp)
     ) {
+        Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = "Timestamp",
             fontWeight = FontWeight.Bold,
