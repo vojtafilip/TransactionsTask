@@ -21,7 +21,6 @@ import io.ktor.utils.io.jvm.javaio.toInputStream
 import org.koin.ktor.ext.inject
 import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
-import org.transactions_task.TRANSACTIONS_FILE_SIZE_LIMIT
 import org.transactions_task.api.dto.TransactionsPostResponseDTO
 import org.transactions_task.service.GetTransactionsService
 import org.transactions_task.service.PostTransactionsService
@@ -51,10 +50,16 @@ fun Application.configureRouting() {
 }
 
 private fun Route.setupTransactionsPostBodyLimit() {
+
+    // TODO separate to a configuration logic, to process of application configs at one place
+    val transactionsFileSizeLimit: Long = environment.config
+        .propertyOrNull("ktor.transactions.fileSizeLimit")!!
+        .getString().toLong()
+
     install(RequestBodyLimit) {
         bodyLimit { call ->
             when (call.request.httpMethod) {
-                HttpMethod.Post -> TRANSACTIONS_FILE_SIZE_LIMIT
+                HttpMethod.Post -> transactionsFileSizeLimit
                 else -> Long.MAX_VALUE
             }
         }
