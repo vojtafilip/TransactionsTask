@@ -1,6 +1,7 @@
 package org.transactions_task
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
@@ -65,6 +66,36 @@ class ComposeAppSpecification {
         onNodeWithText("transaction 1").assertExists()
         onNodeWithText("transaction 5").assertExists()
         onNodeWithText("transaction 10").assertExists()
+    }
+
+    @Test
+    fun `should mark transaction with biggest amount`() = runComposeUiTest {
+        // given
+        val biggest = 3
+        val transactions = (1..5).map {
+            Transaction(
+                timestamp = Clock.System.now(),
+                amount = it.toLong(),
+                description = "transaction $it",
+                isBiggest = it == biggest
+            )
+        }
+
+        // when
+        setContent {
+            TransactionsScreen(
+                createViewModel(
+                    Api.LoadResponse.Success(transactions)
+                )
+            )
+        }
+
+        // then
+        onNodeWithTag("biggestTransaction - 1").assertDoesNotExist()
+        onNodeWithTag("biggestTransaction - 2").assertDoesNotExist()
+        onNodeWithTag("biggestTransaction - 3").assertExists()
+        onNodeWithTag("biggestTransaction - 4").assertDoesNotExist()
+        onNodeWithTag("biggestTransaction - 5").assertDoesNotExist()
     }
 }
 
