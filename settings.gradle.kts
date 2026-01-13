@@ -28,6 +28,6 @@ dependencyResolutionManagement {
     }
 }
 
-include("modules:webFronted")
+include("modules:webFrontend")
 include("modules:server")
 include("modules:shared")
