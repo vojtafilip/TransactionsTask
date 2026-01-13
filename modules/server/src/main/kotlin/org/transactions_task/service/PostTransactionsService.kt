@@ -23,7 +23,7 @@ class PostTransactionsService(
         ) : ProcessResult()
     }
 
-    fun process(csvInputStream: InputStream): ProcessResult {
+    suspend fun process(csvInputStream: InputStream): ProcessResult {
         when (val result = transactionsCsvReader.read(csvInputStream)) {
             is WrongCsvHeader -> {
                 return BadRequest(result.message)

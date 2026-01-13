@@ -10,7 +10,7 @@ interface TransactionsRepository {
         val failedToInsert: List<Reference>
     )
 
-    fun insertTransactions(transactions: List<TransactionRecord>): InsertResult
+    suspend fun insertTransactions(transactions: List<TransactionRecord>): InsertResult
 
     data class GetSortedTransactionsResult(
         val sortedTransactions: List<TransactionRecord>,
