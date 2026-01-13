@@ -7,6 +7,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.transactions_task.AppConfig.BACKEND_URL
 import org.transactions_task.api.dto.TransactionsDTO
 import org.transactions_task.api.dto.TransactionsDTO.TransactionDTO
 import org.transactions_task.model.Transaction
@@ -22,9 +23,6 @@ interface Api {
     suspend fun loadTransactions(): LoadResponse
 }
 
-
-// TODO to configuration
-const val BACKEND_URL = "http://localhost:5000/transactions?format=json"
 
 class HttpApi : Api {
 
