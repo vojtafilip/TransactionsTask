@@ -6,13 +6,22 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.config.MapApplicationConfig
+import io.ktor.server.config.mergeWith
 import io.ktor.server.testing.ApplicationTestBuilder
-import org.transactions_task.module
 
 fun ApplicationTestBuilder.setupApplicationModule() {
-    application {
-        module(testing = true)
+    environment {
+        config = ApplicationConfig("application.conf")
+            .mergeWith(MapApplicationConfig(
+                "ktor.db.dropTables" to "true")
+            )
     }
+// Alternative:
+//    application {
+//        module(testing = true)
+//    }
 }
 
 suspend fun ApplicationTestBuilder.postTransactions(
