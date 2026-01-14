@@ -23,7 +23,7 @@ import org.transactions_task.domain.model.TransactionRecord
 import org.transactions_task.service.GetTransactionsService.GetTransactionsResult
 
 
-fun GetTransactionsResult.toDTO() = TransactionsGetResponseDTO(
+fun GetTransactionsResult.Success.toDTO() = TransactionsGetResponseDTO(
     sortedTransactions = sortedTransactions.map {
         TransactionsGetResponseDTO.TransactionDTO(
             timestamp = it.timestamp.toString(),
@@ -36,7 +36,7 @@ fun GetTransactionsResult.toDTO() = TransactionsGetResponseDTO(
 )
 
 fun HTML.transactionsResultToHtml(
-    getTransactionsResult: GetTransactionsResult,
+    getTransactionsResult: GetTransactionsResult.Success,
     limit: Int
 ) {
     head {

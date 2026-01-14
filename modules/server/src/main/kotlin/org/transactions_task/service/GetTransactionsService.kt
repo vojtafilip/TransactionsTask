@@ -11,15 +11,27 @@ class GetTransactionsService(
     private val transactionsRepository: TransactionsRepository
 ) {
 
-    data class GetTransactionsResult(
-        val sortedTransactions: List<TransactionRecord>,
-        val markedTransactions: List<Reference>,
-        val nextCursor: String?
-    )
+    sealed class GetTransactionsResult {
+        data class BadRequest(
+            val message: String
+        ) : GetTransactionsResult()
+
+        data class Success(
+            val sortedTransactions: List<TransactionRecord>,
+            val markedTransactions: List<Reference>,
+            val nextCursor: String?
+        ) : GetTransactionsResult()
+    }
 
     suspend fun getTransactions(cursor: String?, limit: Int): GetTransactionsResult {
+        val decodedCursor = try {
+            decodeCursor(cursor)
+        } catch (_: IllegalArgumentException) {
+            return GetTransactionsResult.BadRequest("Invalid cursor.")
+        }
+
         val sortedTransactionsResult = transactionsRepository.getSortedTransactions(
-            decodeCursor(cursor),
+            decodedCursor,
             limit
         )
 
@@ -27,7 +39,7 @@ class GetTransactionsService(
             .filter { it.amount == sortedTransactionsResult.maxAmount }
             .map { it.reference }
 
-        return GetTransactionsResult(
+        return GetTransactionsResult.Success(
             sortedTransactionsResult.sortedTransactions,
             markedTransactions,
             encodeCursor(sortedTransactionsResult.cursor)

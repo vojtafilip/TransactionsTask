@@ -23,7 +23,9 @@ import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
 import org.transactions_task.api.dto.TransactionsPostResponseDTO
 import org.transactions_task.service.GetTransactionsService
+import org.transactions_task.service.GetTransactionsService.GetTransactionsResult
 import org.transactions_task.service.PostTransactionsService
+import org.transactions_task.service.PostTransactionsService.ProcessResult
 
 
 object Routes {
@@ -76,11 +78,11 @@ private suspend fun RoutingContext.processTransactionsPost(
     when (
         val result = postTransactionsService.process(ips)
     ) {
-        is PostTransactionsService.ProcessResult.BadRequest -> {
+        is ProcessResult.BadRequest -> {
             call.respond(HttpStatusCode.BadRequest, result.message)
         }
 
-        is PostTransactionsService.ProcessResult.Success -> {
+        is ProcessResult.Success -> {
             call.respond(
                 HttpStatusCode.OK,
                 TransactionsPostResponseDTO(
@@ -115,18 +117,26 @@ private suspend fun RoutingContext.processTransactionsGet(
     val limit = (call.request.queryParameters["limit"]?.toIntOrNull() ?: DEFAULT_LIMIT)
         .coerceIn(1, MAX_LIMIT)
 
-    val getTransactionsResult = getTransactionsService.getTransactions(cursor, limit)
+    when (
+        val result = getTransactionsService.getTransactions(cursor, limit)
+    ) {
+        is GetTransactionsResult.BadRequest -> {
+            call.respond(HttpStatusCode.BadRequest, result.message)
+        }
 
-    if (format == "json") {
-        call.respond(
-            HttpStatusCode.OK,
-            getTransactionsResult.toDTO()
-        )
-    } else {
-        call.respondHtml(
-            HttpStatusCode.OK
-        ) {
-            transactionsResultToHtml(getTransactionsResult, limit)
+        is GetTransactionsResult.Success -> {
+            if (format == "json") {
+                call.respond(
+                    HttpStatusCode.OK,
+                    result.toDTO()
+                )
+            } else {
+                call.respondHtml(
+                    HttpStatusCode.OK
+                ) {
+                    transactionsResultToHtml(result, limit)
+                }
+            }
         }
     }
 }
