@@ -12,7 +12,10 @@ import org.transactions_task.model.Transaction
 sealed class RepositoryLoadingState {
     data object Loading : RepositoryLoadingState()
     data class Error(val message: String) : RepositoryLoadingState()
-    data class Success(val transactions: List<Transaction>) : RepositoryLoadingState()
+    data class Success(
+        val transactions: List<Transaction>,
+        val nextCursor: String?
+    ) : RepositoryLoadingState()
 }
 
 class TransactionsRepository(
@@ -27,7 +30,10 @@ class TransactionsRepository(
             val result = api.loadTransactions()
         ) {
             is Api.LoadResponse.Error -> RepositoryLoadingState.Error(result.message)
-            is Api.LoadResponse.Success -> RepositoryLoadingState.Success(result.transactions)
+            is Api.LoadResponse.Success -> RepositoryLoadingState.Success(
+                result.transactions,
+                result.nextCursor
+            )
         }
 
         emit(loadingState)

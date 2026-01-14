@@ -64,7 +64,8 @@ private fun TransactionsContent(uiState: UiState) {
 
             is UiState.Success -> TransactionsList(
                 modifier = Modifier.padding(16.dp),
-                transactions = uiState.transactions
+                transactions = uiState.transactions,
+                showCursorMessage = uiState.showCursorMessage
             )
         }
     }

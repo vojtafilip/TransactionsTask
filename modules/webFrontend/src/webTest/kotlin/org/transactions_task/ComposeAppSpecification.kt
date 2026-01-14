@@ -1,7 +1,6 @@
 package org.transactions_task
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
@@ -56,7 +55,7 @@ class ComposeAppSpecification {
         setContent {
             TransactionsScreen(
                 createViewModel(
-                    Api.LoadResponse.Success(transactions)
+                    Api.LoadResponse.Success(transactions, null)
                 )
             )
         }
@@ -85,7 +84,7 @@ class ComposeAppSpecification {
         setContent {
             TransactionsScreen(
                 createViewModel(
-                    Api.LoadResponse.Success(transactions)
+                    Api.LoadResponse.Success(transactions, null)
                 )
             )
         }

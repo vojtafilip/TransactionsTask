@@ -22,7 +22,10 @@ data class TransactionVM(
 sealed class UiState {
     data object Loading : UiState()
     data class Error(val message: String) : UiState()
-    data class Success(val transactions: List<TransactionVM>) : UiState()
+    data class Success(
+        val transactions: List<TransactionVM>,
+        val showCursorMessage: Boolean
+    ) : UiState()
 }
 
 class TransactionsViewModel(
@@ -49,7 +52,10 @@ class TransactionsViewModel(
 private fun RepositoryLoadingState.toUiState() = when (this) {
     is RepositoryLoadingState.Loading -> UiState.Loading
     is RepositoryLoadingState.Error -> UiState.Error(message)
-    is RepositoryLoadingState.Success -> UiState.Success(transactions.map { it.toVM() })
+    is RepositoryLoadingState.Success -> UiState.Success(
+        transactions = transactions.map { it.toVM() },
+        showCursorMessage = nextCursor != null
+    )
 }
 
 private fun Transaction.toVM() = TransactionVM(

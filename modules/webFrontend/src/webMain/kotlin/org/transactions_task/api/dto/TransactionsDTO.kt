@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TransactionsDTO(
     val sortedTransactions: List<TransactionDTO>,
-//  TODO  val nextCursor: String?
+    val nextCursor: String?
 ) {
     @Serializable
     data class TransactionDTO(

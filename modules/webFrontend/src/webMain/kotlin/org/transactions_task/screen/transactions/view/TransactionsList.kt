@@ -19,12 +19,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.transactions_task.AppConfig.TRANSACTIONS_LIMIT
 import org.transactions_task.screen.transactions.TransactionVM
 
 @Composable
 fun TransactionsList(
     modifier: Modifier = Modifier.Companion,
     transactions: List<TransactionVM>,
+    showCursorMessage: Boolean
 ) {
     Column(
         modifier = modifier.testTag("transactionsList"),
@@ -38,6 +40,11 @@ fun TransactionsList(
             items(transactions) { transaction ->
                 ListRow(transaction)
             }
+        }
+
+        if (showCursorMessage) {
+            // TODO implement pagination
+            Text("Pagination is not implemented yet. Showing just first $TRANSACTIONS_LIMIT transactions.")
         }
     }
 }

@@ -16,7 +16,11 @@ import kotlin.time.Instant
 interface Api {
 
     sealed class LoadResponse {
-        data class Success(val transactions: List<Transaction>) : LoadResponse()
+        data class Success(
+            val transactions: List<Transaction>,
+            val nextCursor: String?
+        ) : LoadResponse()
+
         data class Error(val message: String) : LoadResponse()
     }
 
@@ -30,7 +34,7 @@ class HttpApi : Api {
         install(HttpTimeout) {
             requestTimeoutMillis = 10_000
             connectTimeoutMillis = 5_000
-            socketTimeoutMillis  = 10_000
+            socketTimeoutMillis = 10_000
         }
         install(ContentNegotiation) {
             json(
@@ -49,7 +53,8 @@ class HttpApi : Api {
             return Api.LoadResponse.Success(
                 transactions = transactionsDTO.sortedTransactions.map {
                     it.convertToTransaction()
-                }
+                },
+                nextCursor = transactionsDTO.nextCursor
             )
 
         } catch (e: Exception) {
