@@ -17,7 +17,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import io.ktor.utils.io.jvm.javaio.toInputStream
 import org.koin.ktor.ext.inject
 import org.transactions_task.FeatureToggle
 import org.transactions_task.Strings
@@ -73,10 +72,10 @@ private suspend fun RoutingContext.processTransactionsPost(
 ) {
     if (!isCsvContentType()) return
 
-    val ips = call.receiveChannel().toInputStream()
+    val channel = call.receiveChannel()
 
     when (
-        val result = postTransactionsService.process(ips)
+        val result = postTransactionsService.process(channel)
     ) {
         is ProcessResult.BadRequest -> {
             call.respond(HttpStatusCode.BadRequest, result.message)

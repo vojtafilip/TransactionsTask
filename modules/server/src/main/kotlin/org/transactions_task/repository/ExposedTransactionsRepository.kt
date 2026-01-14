@@ -10,37 +10,18 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.insertIgnore
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.transactions_task.domain.model.Reference
 import org.transactions_task.domain.model.TransactionRecord
 import org.transactions_task.repository.TransactionsRepository.Cursor
 import org.transactions_task.repository.TransactionsRepository.GetSortedTransactionsResult
-import org.transactions_task.repository.TransactionsRepository.InsertResult
 import org.transactions_task.repository.database.TransactionsTable
 import kotlin.time.Instant
 
 class ExposedTransactionsRepository : TransactionsRepository {
 
-    override suspend fun insertTransactions(transactions: List<TransactionRecord>): InsertResult {
-
-        var insertedCount = 0
-        val failedToInsert = mutableListOf<Reference>()
-
-        transactions.forEach { transaction ->
-            val inserted = insertTransaction(transaction)
-
-            if (inserted) {
-                insertedCount++
-            } else {
-                failedToInsert.add(transaction.reference)
-            }
-        }
-
-        return InsertResult(insertedCount, failedToInsert)
-    }
-
-    private suspend fun insertTransaction(transaction: TransactionRecord): Boolean =
-        suspendTransaction {
+    override fun insertTransaction(transaction: TransactionRecord): Boolean =
+        transaction {
             val count = TransactionsTable.insertIgnore {
                 it[reference] = transaction.reference.ref
                 it[timestamp] = transaction.timestamp
@@ -48,14 +29,14 @@ class ExposedTransactionsRepository : TransactionsRepository {
                 it[currency] = transaction.currency
                 it[description] = transaction.description
             }.insertedCount
-            return@suspendTransaction count != 0
+            return@transaction count != 0
         }
 
-    override suspend fun getSortedTransactions(
+    override fun getSortedTransactions(
         cursor: Cursor?,
         limit: Int
     ): GetSortedTransactionsResult =
-        suspendTransaction {
+        transaction {
             val (sortedTransactions, nextCursor) = getSortedTransactionsInternal(cursor, limit)
             val maxAmount = getMaxAmount()
 

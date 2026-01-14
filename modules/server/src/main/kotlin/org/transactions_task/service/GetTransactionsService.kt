@@ -23,7 +23,7 @@ class GetTransactionsService(
         ) : GetTransactionsResult()
     }
 
-    suspend fun getTransactions(cursor: String?, limit: Int): GetTransactionsResult {
+    fun getTransactions(cursor: String?, limit: Int): GetTransactionsResult {
         val decodedCursor = try {
             decodeCursor(cursor)
         } catch (_: IllegalArgumentException) {

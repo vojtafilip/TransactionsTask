@@ -7,6 +7,7 @@ import org.transactions_task.Config.TRANSACTION_DESCRIPTION_MAX_LENGTH
 import org.transactions_task.domain.model.Currency
 import org.transactions_task.domain.model.Reference
 import org.transactions_task.domain.model.TransactionRecord
+import org.transactions_task.service.TransactionsCsvReader.CsvValidationResult.*
 import java.io.InputStream
 import kotlin.time.Instant
 
@@ -17,43 +18,54 @@ class TransactionsCsvReader {
         // TODO setup if needed
     }
 
-    sealed class CsvReadResult {
-        data class WrongCsvHeader(val message: String) : CsvReadResult()
-        data object EmptyCsv : CsvReadResult()
-        data class MissingCsvField(val message: String) : CsvReadResult()
-        data class WrongCsvLine(val message: String) : CsvReadResult()
-        data class Success(val transactions: List<TransactionRecord>) : CsvReadResult()
+    sealed class CsvValidationResult {
+        data class WrongCsvHeader(val message: String) : CsvValidationResult()
+        data object EmptyCsv : CsvValidationResult()
+        data class MissingCsvField(val message: String) : CsvValidationResult()
+        data class WrongCsvLine(val message: String) : CsvValidationResult()
+        data object Success : CsvValidationResult()
     }
 
-    fun read(ips: InputStream): CsvReadResult {
-        // TODO use csvReader.open(ips) and readAllWithHeaderAsSequence() to read as stream
+    // TODO more detailed validations, don't stop at first invalid line
+    fun validate(ips: InputStream): CsvValidationResult {
+        val processedLines = try {
+            processCsv(ips) {}
+        } catch (e: NoSuchElementException) {
+            return WrongCsvHeader(e.message ?: "Unknown error")
+        } catch (e: CSVFieldNumDifferentException) {
+            // TODO setup csvReader with insufficientFieldsRowBehaviour and excessFieldsRowBehaviour and check it for each line
+            return MissingCsvField(e.message ?: "Unknown error")
+        } catch (e: WrongCsvLineException) {
+            // TODO move logger to more general place
+            LOGGER.error("Failed to parse CSV line ${e.lineNumber}.", e)
 
-        val transactions: List<TransactionRecord> =
-            try {
-                readCsv(ips)
-            } catch (e: NoSuchElementException) {
-                return CsvReadResult.WrongCsvHeader(e.message ?: "Unknown error")
-            } catch (e: CSVFieldNumDifferentException) {
-                // TODO setup csvReader with insufficientFieldsRowBehaviour and excessFieldsRowBehaviour and check it for each line
-                return CsvReadResult.MissingCsvField(e.message ?: "Unknown error")
-            } catch (e: WrongCsvLineException) {
-                // TODO move logger to more general place
-                LOGGER.error("Failed to parse CSV line ${e.lineNumber}.", e)
+            // TODO propagate info about line
+            return WrongCsvLine(e.message ?: "Unknown error")
+        }
 
-                // TODO log to logger, propagate info about line
-                return CsvReadResult.WrongCsvLine(e.message ?: "Unknown error")
-            }
+        if (processedLines == 0) return EmptyCsv
 
-        if (transactions.isEmpty()) return CsvReadResult.EmptyCsv
-
-        return CsvReadResult.Success(transactions)
+        return Success
     }
 
-    private fun readCsv(ips: InputStream): List<TransactionRecord> =
-        csvReader
-            .readAllWithHeader(ips)
-            .map { CsvLine(it) }
-            .mapIndexed { i, line -> line.toTransactionRecord(i + 1) }
+    fun read(ips: InputStream, onEach: (TransactionRecord) -> Unit) {
+        // no try-catch - we expect CSV is already validated
+        processCsv(ips, onEach)
+    }
+
+    private fun processCsv(ips: InputStream, onEach: (TransactionRecord) -> Unit): Int {
+        var processedLines = 0
+        csvReader.open(ips) {
+            readAllWithHeaderAsSequence()
+                .map { CsvLine(it) }
+                .mapIndexed { i, line -> line.toTransactionRecord(i + 1) }
+                .forEach {
+                    onEach(it)
+                    processedLines++
+                }
+        }
+        return processedLines
+    }
 
 }
 

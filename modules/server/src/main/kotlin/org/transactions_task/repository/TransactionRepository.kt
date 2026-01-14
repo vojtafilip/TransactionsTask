@@ -7,12 +7,7 @@ import kotlin.time.Instant
 
 interface TransactionsRepository {
 
-    data class InsertResult(
-        val insertedCount: Int,
-        val failedToInsert: List<Reference>
-    )
-
-    suspend fun insertTransactions(transactions: List<TransactionRecord>): InsertResult
+    fun insertTransaction(transaction: TransactionRecord): Boolean
 
     data class GetSortedTransactionsResult(
         val sortedTransactions: List<TransactionRecord>,
@@ -26,5 +21,5 @@ interface TransactionsRepository {
         val reference: Reference
     )
 
-    suspend fun getSortedTransactions(cursor: Cursor?, limit: Int): GetSortedTransactionsResult
+    fun getSortedTransactions(cursor: Cursor?, limit: Int): GetSortedTransactionsResult
 }

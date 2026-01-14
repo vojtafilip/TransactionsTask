@@ -1,14 +1,20 @@
 package org.transactions_task.service
 
+import io.ktor.util.cio.writeChannel
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.copyTo
 import org.transactions_task.domain.model.Reference
 import org.transactions_task.repository.TransactionsRepository
-import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.EmptyCsv
-import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.MissingCsvField
-import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.Success
-import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.WrongCsvHeader
-import org.transactions_task.service.TransactionsCsvReader.CsvReadResult.WrongCsvLine
+import org.transactions_task.service.TransactionsCsvReader.CsvValidationResult.EmptyCsv
+import org.transactions_task.service.TransactionsCsvReader.CsvValidationResult.MissingCsvField
+import org.transactions_task.service.TransactionsCsvReader.CsvValidationResult.Success
+import org.transactions_task.service.TransactionsCsvReader.CsvValidationResult.WrongCsvHeader
+import org.transactions_task.service.TransactionsCsvReader.CsvValidationResult.WrongCsvLine
 import org.transactions_task.service.PostTransactionsService.ProcessResult.*
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
+import kotlin.io.path.createTempFile
 
 class PostTransactionsService(
     private val transactionsRepository: TransactionsRepository
@@ -23,32 +29,71 @@ class PostTransactionsService(
         ) : ProcessResult()
     }
 
-    suspend fun process(csvInputStream: InputStream): ProcessResult {
-        when (val result = transactionsCsvReader.read(csvInputStream)) {
-            is WrongCsvHeader -> {
-                return BadRequest(result.message)
-            }
+    suspend fun process(csvChannel: ByteReadChannel): ProcessResult {
+        val tempFile = createTempFile(csvChannel)
+        try {
+            return process(tempFile)
+        } finally {
+            tempFile.delete()
+        }
+    }
 
-            is MissingCsvField -> {
-                return BadRequest(result.message)
-            }
+    private suspend fun createTempFile(csvChannel: ByteReadChannel): File {
+        val tempFile = createTempFile().toFile()
+        tempFile.deleteOnExit()
+        copyToTempFile(tempFile, csvChannel)
+        return tempFile
+    }
 
-            is WrongCsvLine -> {
-                return BadRequest(result.message)
-            }
+    private suspend fun copyToTempFile(tempFile: File, channel: ByteReadChannel) {
+        val fileChannel = tempFile.writeChannel()
+        try {
+            channel.copyTo(fileChannel)
+        } finally {
+            fileChannel.flushAndClose()
+        }
+    }
 
-            is EmptyCsv -> {
-                return BadRequest("Empty CSV file.")
-            }
-
-            is Success -> {
-                val insertResult = transactionsRepository.insertTransactions(result.transactions)
-
-                return Success(
-                    insertResult.insertedCount,
-                    insertResult.failedToInsert
-                )
+    private fun process(tempFile: File): ProcessResult {
+        tempFile.inputStream().use { csvInputStream ->
+            val result = validate(csvInputStream)
+            if (result != null) {
+                return BadRequest(result)
             }
         }
+
+        tempFile.inputStream().use { csvInputStream ->
+            return processTransactions(csvInputStream)
+        }
+    }
+
+    private fun validate(ips: InputStream): String? =
+        when (
+            val result = transactionsCsvReader.validate(ips)
+        ) {
+            is WrongCsvHeader -> result.message
+            is MissingCsvField -> result.message
+            is WrongCsvLine -> result.message
+            is EmptyCsv -> "Empty CSV file."
+            is Success -> null
+        }
+
+    private fun processTransactions(csvInputStream: FileInputStream): ProcessResult.Success {
+        var insertedCount = 0
+        val failedToInsert = mutableListOf<Reference>()
+
+        transactionsCsvReader.read(csvInputStream) { transaction ->
+            val inserted = transactionsRepository.insertTransaction(transaction)
+            if (inserted) {
+                insertedCount++
+            } else {
+                failedToInsert.add(transaction.reference)
+            }
+        }
+
+        return Success(
+            insertedCount,
+            failedToInsert
+        )
     }
 }
