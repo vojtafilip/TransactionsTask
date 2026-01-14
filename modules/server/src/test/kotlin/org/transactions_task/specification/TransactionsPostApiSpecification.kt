@@ -32,7 +32,7 @@ class TransactionsPostApiSpecification {
         assertEquals(HttpStatusCode.OK, response2.status)
         assertEquals(
             """
-{"sortedTransactions":[{"timestamp":"2023-01-11T09:00:00Z","amount":-100,"description":"Lekárna Hradčanská","isBiggest":false},{"timestamp":"2023-01-11T03:00:01Z","amount":20000,"description":"","isBiggest":true}]}
+{"sortedTransactions":[{"timestamp":"2023-01-11T09:00:00Z","amount":-100,"description":"Lekárna Hradčanská","isBiggest":false},{"timestamp":"2023-01-11T03:00:01Z","amount":20000,"description":"","isBiggest":true}],"nextCursor":null}
             """.trimMargin(),
             response2.bodyAsText()
         )
@@ -66,7 +66,7 @@ class TransactionsPostApiSpecification {
         assertEquals(HttpStatusCode.OK, response3.status)
         assertEquals(
             """
-{"sortedTransactions":[{"timestamp":"2023-01-11T12:00:00Z","amount":-220,"description":"Šenkýrna","isBiggest":false},{"timestamp":"2023-01-11T10:10:10Z","amount":-1337,"description":"Lidl","isBiggest":false},{"timestamp":"2023-01-11T09:00:00Z","amount":-100,"description":"Lekárna Hradčanská","isBiggest":false},{"timestamp":"2023-01-11T03:00:01Z","amount":20000,"description":"","isBiggest":true}]}
+{"sortedTransactions":[{"timestamp":"2023-01-11T12:00:00Z","amount":-220,"description":"Šenkýrna","isBiggest":false},{"timestamp":"2023-01-11T10:10:10Z","amount":-1337,"description":"Lidl","isBiggest":false},{"timestamp":"2023-01-11T09:00:00Z","amount":-100,"description":"Lekárna Hradčanská","isBiggest":false},{"timestamp":"2023-01-11T03:00:01Z","amount":20000,"description":"","isBiggest":true}],"nextCursor":null}
             """.trimMargin(),
             response3.bodyAsText()
         )
@@ -100,7 +100,7 @@ class TransactionsPostApiSpecification {
         assertEquals(HttpStatusCode.OK, response3.status)
         assertEquals(
             """
-{"sortedTransactions":[{"timestamp":"2023-01-11T09:00:00Z","amount":-100,"description":"Lekárna Hradčanská","isBiggest":false},{"timestamp":"2023-01-11T03:00:01Z","amount":20000,"description":"","isBiggest":true}]}
+{"sortedTransactions":[{"timestamp":"2023-01-11T09:00:00Z","amount":-100,"description":"Lekárna Hradčanská","isBiggest":false},{"timestamp":"2023-01-11T03:00:01Z","amount":20000,"description":"","isBiggest":true}],"nextCursor":null}
             """.trimMargin(),
             response3.bodyAsText()
         )
