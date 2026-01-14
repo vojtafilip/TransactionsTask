@@ -35,6 +35,8 @@ Responses:
 * 415 Unsupported Media Type if file is not CSV.
 * 400 Bad Request if file is invalid.
 
+Note: if a transaction is already stored (identified by Reference), it is skipped.
+
 #### GET /transactions - get all stored transactions as HTML or JSON.
 
 Parameters:
