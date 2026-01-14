@@ -140,7 +140,50 @@ class TransactionsPostApiFailsSpecification {
         // then
         assertEquals(HttpStatusCode.BadRequest, response.status)
         assertEquals(
-            "Failed to parse CSV line.",
+            "Failed to parse CSV line 1: For input string: \"WRONG\"",
+            response.bodyAsText()
+        )
+    }
+
+    @Test
+    fun `should fail on too long description`() = testApplication {
+        // given
+        setupApplicationModule()
+        val description = "x".repeat(2000)
+        val requestBody = """
+            reference,timestamp,amount,currency,description
+            10000001,2023-01-11T09:00:00Z,-100,CZK,description
+            10000002,2023-01-11T09:00:00Z,-100,CZK,$description
+        """.trimIndent()
+
+        // when
+        val response = postTransactions(requestBody)
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals(
+            "Failed to parse CSV line 2: Description is too long.",
+            response.bodyAsText()
+        )
+    }
+
+    @Test
+    fun `should fail on unexpected currency`() = testApplication {
+        // given
+        setupApplicationModule()
+        val requestBody = """
+            reference,timestamp,amount,currency,description
+            10000001,2023-01-11T09:00:00Z,-100,CZK,description
+            10000002,2023-01-11T09:00:00Z,-100,WRONG,description
+        """.trimIndent()
+
+        // when
+        val response = postTransactions(requestBody)
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals(
+            "Failed to parse CSV line 2: Wrong currency",
             response.bodyAsText()
         )
     }

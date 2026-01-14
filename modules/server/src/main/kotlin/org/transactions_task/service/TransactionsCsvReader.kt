@@ -3,6 +3,7 @@ package org.transactions_task.service
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.util.CSVFieldNumDifferentException
 import io.ktor.util.logging.KtorSimpleLogger
+import org.transactions_task.Config.TRANSACTION_DESCRIPTION_MAX_LENGTH
 import org.transactions_task.domain.model.Currency
 import org.transactions_task.domain.model.Reference
 import org.transactions_task.domain.model.TransactionRecord
@@ -52,7 +53,7 @@ class TransactionsCsvReader {
         csvReader
             .readAllWithHeader(ips)
             .map { CsvLine(it) }
-            .mapIndexed { i, line -> line.toTransactionRecord(i) }
+            .mapIndexed { i, line -> line.toTransactionRecord(i + 1) }
 
 }
 
@@ -73,11 +74,20 @@ private fun CsvLine.toTransactionRecord(lineNumber: Int) =
             if (currency == "CZK") Currency.CZK else error("Wrong currency"), // TODO use sophisticated parsing
             description.ifBlank { null }
                 ?.trim()
+                ?.also {
+                    require(it.length <= TRANSACTION_DESCRIPTION_MAX_LENGTH) {
+                        "Description is too long."
+                    }
+                }
         )
     } catch (e: NoSuchElementException) {
         throw e
     } catch (e: Exception) {
-        throw WrongCsvLineException(lineNumber, "Failed to parse CSV line.", e)
+        throw WrongCsvLineException(
+            lineNumber,
+            "Failed to parse CSV line $lineNumber: ${e.message ?: "Unknown reason."}",
+            e
+        )
     }
 
 private class WrongCsvLineException(

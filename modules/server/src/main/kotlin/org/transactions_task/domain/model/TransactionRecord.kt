@@ -7,6 +7,7 @@ import kotlin.time.Instant
 @JvmInline
 value class Reference(val ref: Long)
 
+// Now we support only required currencies. TODO make it configurable
 enum class Currency {
     CZK
 }
