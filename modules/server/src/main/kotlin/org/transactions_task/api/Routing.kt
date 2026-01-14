@@ -126,7 +126,7 @@ private suspend fun RoutingContext.processTransactionsGet(
         call.respondHtml(
             HttpStatusCode.OK
         ) {
-            transactionsResultToHtml(getTransactionsResult)
+            transactionsResultToHtml(getTransactionsResult, limit)
         }
     }
 }

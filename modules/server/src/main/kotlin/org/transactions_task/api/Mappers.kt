@@ -4,6 +4,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.html.HTML
 import kotlinx.html.TBODY
+import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.caption
 import kotlinx.html.h1
@@ -16,6 +17,7 @@ import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.title
 import kotlinx.html.tr
+import org.transactions_task.api.Routes.TRANSACTIONS
 import org.transactions_task.api.dto.TransactionsGetResponseDTO
 import org.transactions_task.domain.model.TransactionRecord
 import org.transactions_task.service.GetTransactionsService.GetTransactionsResult
@@ -33,7 +35,10 @@ fun GetTransactionsResult.toDTO() = TransactionsGetResponseDTO(
     nextCursor = nextCursor
 )
 
-fun HTML.transactionsResultToHtml(getTransactionsResult: GetTransactionsResult) {
+fun HTML.transactionsResultToHtml(
+    getTransactionsResult: GetTransactionsResult,
+    limit: Int
+) {
     head {
         title { +"Transactions" }
     }
@@ -54,6 +59,11 @@ fun HTML.transactionsResultToHtml(getTransactionsResult: GetTransactionsResult) 
                     val isBiggest = transaction.reference in getTransactionsResult.markedTransactions
                     renderTransactionRow(isBiggest, transaction)
                 }
+            }
+        }
+        if (getTransactionsResult.nextCursor != null) {
+            a(href = createNextPageLink(limit, getTransactionsResult.nextCursor)) {
+                +"Show next page"
             }
         }
     }
@@ -87,3 +97,6 @@ private fun TBODY.renderTransactionRow(
         }
     }
 }
+
+private fun createNextPageLink(limit: Int, nextCursor: String) =
+    "$TRANSACTIONS?limit=$limit&cursor=${nextCursor}"
