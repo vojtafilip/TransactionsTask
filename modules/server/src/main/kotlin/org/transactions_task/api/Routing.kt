@@ -102,12 +102,20 @@ private suspend fun RoutingContext.isCsvContentType(): Boolean {
     return true
 }
 
+
+private const val DEFAULT_LIMIT = 100
+private const val MAX_LIMIT = 1000
+
+
 private suspend fun RoutingContext.processTransactionsGet(
     getTransactionsService: GetTransactionsService
 ) {
     val format = call.request.queryParameters["format"]
+    val cursor = call.request.queryParameters["cursor"]
+    val limit = (call.request.queryParameters["limit"]?.toIntOrNull() ?: DEFAULT_LIMIT)
+        .coerceIn(1, MAX_LIMIT)
 
-    val getTransactionsResult = getTransactionsService.getTransactions()
+    val getTransactionsResult = getTransactionsService.getTransactions(cursor, limit)
 
     if (format == "json") {
         call.respond(

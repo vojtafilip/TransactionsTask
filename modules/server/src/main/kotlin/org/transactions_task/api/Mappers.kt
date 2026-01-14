@@ -22,14 +22,15 @@ import org.transactions_task.service.GetTransactionsService.GetTransactionsResul
 
 
 fun GetTransactionsResult.toDTO() = TransactionsGetResponseDTO(
-    sortedTransactions.map {
+    sortedTransactions = sortedTransactions.map {
         TransactionsGetResponseDTO.TransactionDTO(
             timestamp = it.timestamp.toString(),
             amount = it.amount,
             description = it.description ?: "",
             isBiggest = it.reference in markedTransactions
         )
-    }
+    },
+    nextCursor = nextCursor
 )
 
 fun HTML.transactionsResultToHtml(getTransactionsResult: GetTransactionsResult) {

@@ -1,7 +1,9 @@
 package org.transactions_task.domain.model
 
+import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
+@Serializable
 @JvmInline
 value class Reference(val ref: Long)
 

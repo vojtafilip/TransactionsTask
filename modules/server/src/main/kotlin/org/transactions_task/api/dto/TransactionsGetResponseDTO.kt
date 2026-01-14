@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TransactionsGetResponseDTO(
-//    val account: Long // TODO some additional info?
-    val sortedTransactions: List<TransactionDTO>
+    val sortedTransactions: List<TransactionDTO>,
+    val nextCursor: String?
 ) {
     @Serializable
     data class TransactionDTO(

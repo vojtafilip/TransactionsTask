@@ -2,17 +2,22 @@ package org.transactions_task.repository
 
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.max
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.insertIgnore
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.transactions_task.domain.model.Reference
 import org.transactions_task.domain.model.TransactionRecord
+import org.transactions_task.repository.TransactionsRepository.Cursor
 import org.transactions_task.repository.TransactionsRepository.GetSortedTransactionsResult
 import org.transactions_task.repository.TransactionsRepository.InsertResult
 import org.transactions_task.repository.database.TransactionsTable
+import kotlin.time.Instant
 
 class ExposedTransactionsRepository : TransactionsRepository {
 
@@ -46,27 +51,57 @@ class ExposedTransactionsRepository : TransactionsRepository {
             return@suspendTransaction count != 0
         }
 
-    override fun getSortedTransactions(): GetSortedTransactionsResult = transaction {
-        val sortedTransactions = getSortedTransactionsInternal()
-        val maxAmount = getMaxAmount()
+    override suspend fun getSortedTransactions(
+        cursor: Cursor?,
+        limit: Int
+    ): GetSortedTransactionsResult =
+        suspendTransaction {
+            val (sortedTransactions, nextCursor) = getSortedTransactionsInternal(cursor, limit)
+            val maxAmount = getMaxAmount()
 
-        GetSortedTransactionsResult(sortedTransactions, maxAmount)
+            GetSortedTransactionsResult(sortedTransactions, maxAmount, nextCursor)
+        }
+
+    private fun getSortedTransactionsInternal(
+        cursor: Cursor?,
+        limit: Int
+    ): Pair<List<TransactionRecord>, Cursor?> {
+        val timestamp: Instant = cursor?.timestamp ?: Instant.DISTANT_FUTURE
+        val reference: Reference = cursor?.reference ?: Reference(Long.MAX_VALUE)
+
+        val transactionRecords = querySortedTransactions(timestamp, reference, limit)
+
+        val nextCursor = if (transactionRecords.size == limit) {
+            Cursor(
+                transactionRecords.last().timestamp,
+                transactionRecords.last().reference
+            )
+        } else {
+            null
+        }
+
+        return Pair(transactionRecords, nextCursor)
     }
 
-    private fun getSortedTransactionsInternal(): List<TransactionRecord> =
-        TransactionsTable
-            .selectAll()
-            .orderBy(TransactionsTable.timestamp, SortOrder.DESC)
-            //            .limit(1000) TODO set limit, add pagination
-            .map { it.toTransactionRecord() }
-
-    private fun getMaxAmount(): Long? {
-        val maxAmountColumn = TransactionsTable.amount.max()
-        return TransactionsTable
-            .select(maxAmountColumn)
-            .firstOrNull()
-            ?.get(maxAmountColumn)
-    }
+    private fun querySortedTransactions(
+        timestamp: Instant,
+        reference: Reference,
+        limit: Int
+    ): List<TransactionRecord> = TransactionsTable
+        .selectAll()
+        .where {
+            (TransactionsTable.timestamp less timestamp)
+                .or(
+                    (TransactionsTable.timestamp eq timestamp)
+                        .and(TransactionsTable.reference less reference.ref)
+                )
+        }
+        .orderBy(
+            TransactionsTable.timestamp to SortOrder.DESC,
+            TransactionsTable.reference to SortOrder.DESC
+        )
+        .limit(limit)
+        .map { it.toTransactionRecord() }
 
     private fun ResultRow.toTransactionRecord(): TransactionRecord = TransactionRecord(
         reference = Reference(this[TransactionsTable.reference]),
@@ -75,4 +110,12 @@ class ExposedTransactionsRepository : TransactionsRepository {
         currency = this[TransactionsTable.currency],
         description = this[TransactionsTable.description]
     )
+
+    private fun getMaxAmount(): Long? {
+        val maxAmountColumn = TransactionsTable.amount.max()
+        return TransactionsTable
+            .select(maxAmountColumn)
+            .firstOrNull()
+            ?.get(maxAmountColumn)
+    }
 }
